@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>GeoJSON tutorial - Leaflet</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            width: 600px;
+            height: 400px;
+        }
+    </style>
+
+
+</head>
+<body>
+
+<div id='map'></div>
+<div class="chart"></div>
+<script>
+    var map = L.map('map').setView([49.551159, 25.593465], 8);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox.light'
+    }).addTo(map);
+
+    d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTD63M76YcZ0x8tWdCVnjxbiRuYm1ioUzCb42kz1Ygb_GJaEPxcsQUBBKvawiwBKEMkL91cLGxF__8j/pub?gid=1164918183&single=true&output=csv')
+            .then(function(data) {
+                var geojson = data.map(function (d) {
+                    return {
+                        type: "Feature",
+                        properties: d,
+                        geometry: {
+                            type: "Point",
+                            coordinates: [+d.Longitude, +d.Latitude]
+                        }
+                    }
+                });
+
+                var markers = L.geoJSON(geojson).addTo(map);
+
+
+                map.on('moveend', function() {
+                    var contained = [];
+
+                    d3.select('div.chart svg').remove();
+
+
+                    markers.eachLayer(function(l) {
+                        if( l instanceof L.Marker && map.getBounds().contains(l.getLatLng()) )
+                            contained.push(l);
+                    });
+
+                    var dataForChart = contained.map(function (d) {
+                        return d.feature.properties
+                    });
+
+                    var nested = d3.nest()
+                            .key(function(d) { return d.work_type; })
+                            .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
+                            .entries(dataForChart);
+
+
+
+                    var namesOfWorks = ["Утеплення торця", "Заміна мереж", "Заміна вікон",
+                        "Ремонт теплових мереж", "Встановлення ІТП", "Утеплення блоку",
+                        "Утеплення будинку", "Капітальний ремонт покрівлі",
+                        "Кавітальний ремонт міжквартальних проїздів",
+                        "Капітальний ремонт покрівель", "Капітальний ремонт міжквартальних проїздів",
+                        "Капітальний ремонт прибудинкової території", "sidewalk_repairment", "road_repairment"]
+
+                    var a = nested.map(d => d.key)
+                    namesOfWorks.forEach(function(d) {
+
+                        if (a.includes(d))
+                        {
+
+                        }
+                        else {
+                            nested.push( {'key':d, 'value':0} )
+                        }
+                    });
+
+                    nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
+
+
+                    var margin = {top: 20, right: 20, bottom: 30, left: 150},
+                            width = 960 - margin.left - margin.right,
+                            height = 500 - margin.top - margin.bottom;
+
+
+                    var svg = d3.select('div.chart').append('svg')
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom)
+                            .append("g")
+                            .attr("transform",
+                                    "translate(" + margin.left + "," + margin.top + ")");
+
+
+// set the ranges
+                    var y = d3.scaleBand()
+                            .range([height, 0])
+                            .padding(0.1);
+
+                    var x = d3.scaleSqrt()
+                            .range([0, width]);
+
+                    // Scale the range of the data in the domains
+                    x.domain([0, d3.max(nested, function(d){ return d.value; })])
+                    y.domain(nested.map(function(d) { return d.key; }));
+                    //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
+
+                    // append the rectangles for the bar chart
+                    svg.selectAll(".bar")
+                            .data(nested)
+                            .enter().append("rect")
+                            .attr("class", "bar")
+                            //.attr("x", function(d) { return x(d.sales); })
+                            .attr("width", function(d) {
+                                return x(d.value);
+                            } )
+                            .attr("y", function(d) {
+                                return y(d.key);
+                            })
+                            .attr("height", '20px');
+
+                    // add the x Axis
+                    svg.append("g")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(x));
+
+                    // add the y Axis
+                    svg.append("g")
+                            .call(d3.axisLeft(y));
+
+
+                });
+
+
+            });
+
+
+
+</script>
+
+
+
+</body>
+</html>
