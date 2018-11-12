@@ -63,7 +63,17 @@
             <!--<h3 class="line"></h3>-->
             <!--<h3 class="station_laying_type"></h3>-->
         <!--</div>-->
-        <div class="chart col-5"></div>
+        <div class="col-5">
+            <div class="chart"></div>
+            <div class="info">
+                <h1></h1>
+                <p class="repairment_company"></p>
+                <p class="work_type"></p>
+                <p class="year"></p>
+                <p class="adress"></p>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -176,13 +186,24 @@
                             .setLatLng(e.latlng)
                             .setContent(e.sourceTarget.feature.properties.description.toString())
                             .openOn(map);
+
+                    d3.select('div.info h3').text(e.sourceTarget.feature.properties.work_type.toString())
+
+                    d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString())
+                    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.work_type.toString())
+                    d3.select('div.info p.year').text(e.sourceTarget.feature.properties.year.toString())
+                    d3.select('div.info p.adress').text(e.sourceTarget.feature.properties.street_name_geocode.replace('Україна, Тернопіль, ', ''))
+
+
+                    console.log(e.sourceTarget.feature.properties);
+
                 }
 
                 markers.on('click', onMapClick);
 
-                markers.on('mouseover', function (d) {
-
-                });
+//                markers.on('mouseover', function (d) {
+//
+//                });
 
                 map.on('moveend', function() {
                     var contained = [];
@@ -213,7 +234,7 @@
                         'Кавітальний ремонт міжквартальних проїздів', 'Капітальний ремонт покрівлі',
                         'Капітальний ремонт покрівель', 'Капітальний ремонт міжквартальних проїздів',
                         'Капітальний ремонт прибудинкової території', 'sidewalk_repairment',
-                        'road_repairment']
+                        'road_repairment'];
 
 
 
@@ -251,7 +272,7 @@
                             .range([height, 0])
                             .padding(0.1);
 
-                    var x = d3.scaleSqrt()
+                    var x = d3.scaleLinear()
                             .range([0, width]);
 
                     // Scale the range of the data in the domains
