@@ -47,6 +47,7 @@
 
         div.chart {
             height: 50vh;
+            margin-top: 5vh;
         }
     </style>
 
@@ -69,6 +70,7 @@
                 <h1></h1>
                 <p class="repairment_company"></p>
                 <p class="work_type"></p>
+                <p class="cost"></p>
                 <p class="year"></p>
                 <p class="adress"></p>
             </div>
@@ -135,80 +137,125 @@
                 }
                 ).addTo(map);
 
-//                map.on('click', function (d) {
-//                    checker += 1;
-//                    console.log(checker);
-//                    if (checker > 3) {
-//                        document.getElementById('infoHidden').style.display = "none";
-//                        checker = 1;
-//                    }
-//                });
 //
-//
-//
-//                markers.on('click', function (d) {
-//
-//                    checker += 1;
-//
-//                    var modal = document.getElementById('infoHidden');
-//                    var span = document.getElementsByClassName("close")[0];
-//
-//                    modal.style.display = "block";
-//                    span.onclick = function () {
-//                        modal.style.display = "none";
-//                        checker = 1;
-//                    };
-//
-//                    d3.select('h1.station').text(d.layer.feature.properties.station);
-//
-//                    d3.select('h3.line').text(d.layer.feature.properties.line + 'гілка');
-//
-//                    d3.select('h3.station_laying_type').text(
-//                            'Тип залягання станції' + d.layer.feature.properties.station_laying_type
-//                    );
-//
-//                });
-
-
-
-//                markers.on('click', function (e) {
-////                    var datum = e.sourceTarget.feature.properties;
-////                    var winOpts = L.control.window(map,{title:''+datum.work_type,content:''+ datum.description,visible: true})
-////                    map.on('click', function () {
-////                        d3.select('div.nonmodal div.leaflet-control-window-wrapper visible').remove();
-////                    })
-//                });
-
-                var popup = L.popup();
 
                 function onMapClick(e) {
-                    popup
-                            .setLatLng(e.latlng)
-                            .setContent(e.sourceTarget.feature.properties.description.toString())
-                            .openOn(map);
-
                     d3.select('div.info h3').text(e.sourceTarget.feature.properties.work_type.toString())
 
                     d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString())
-                    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.work_type.toString())
+                    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString())
+                    d3.select('div.info p.cost').text(e.sourceTarget.feature.properties.cost.toString() + ' грн.')
                     d3.select('div.info p.year').text(e.sourceTarget.feature.properties.year.toString())
                     d3.select('div.info p.adress').text(e.sourceTarget.feature.properties.street_name_geocode.replace('Україна, Тернопіль, ', ''))
 
 
-                    console.log(e.sourceTarget.feature.properties);
 
                 }
 
-                markers.on('click', onMapClick);
+                var contained = [];
 
-//                markers.on('mouseover', function (d) {
-//
-//                });
+                // d3.select('div.chart svg').remove();
+
+
+                markers.eachLayer(function(l) {
+                    if( map.getBounds().contains(l.getLatLng()) )
+                        contained.push(l);
+                });
+
+                var dataForChart = contained.map(function (d) {
+                    return d.feature.properties
+                });
+
+                var nested = d3.nest()
+                        .key(function(d) { return d.work_type; })
+                        .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
+                        .entries(dataForChart);
+
+
+
+                var namesOfWorks = ['Утеплення покрівлі','Заміна вікон та освітлення', 'Утеплення підїзду',
+                    'Утеплення під’їздів', 'Утоплення торця', 'Заміна мереж',
+                    'Утеплення торців', 'Ремонт теплових мереж', 'Встановлення ІТП',
+                    'Заміна вікон', 'Утеплення блоку', 'Утеплення стін', 'Утеплення будинку',
+                    'Кавітальний ремонт міжквартальних проїздів', 'Капітальний ремонт покрівлі',
+                    'Капітальний ремонт покрівель', 'Капітальний ремонт міжквартальних проїздів',
+                    'Капітальний ремонт прибудинкової території', 'sidewalk_repairment',
+                    'road_repairment'];
+
+
+
+
+                var a = nested.map(d => d.key)
+                namesOfWorks.forEach(function(d) {
+
+                    if (a.includes(d))
+                    {
+
+                    }
+                    else {
+                        nested.push( {'key':d, 'value':0} )
+                    }
+                });
+
+                nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
+
+
+                var margin = {top: 0, right: 20, bottom: 30, left: 150},
+                        width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
+                        height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
+
+
+                var svg = d3.select('div.chart').append('svg')
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform",
+                                "translate(" + margin.left + "," + margin.top + ")");
+
+// set the ranges
+
+                var y = d3.scaleBand()
+                        .range([height, 0])
+                        .padding(0.1);
+
+                var x = d3.scalePow().exponent(0.2)
+                        .range([0, width]);
+
+                // Scale the range of the data in the domains
+                x.domain([0, d3.max(nested, function(d){ return d.value; })]);
+                y.domain(nested.map(function(d) { return d.key; }));
+                //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
+
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                        .data(nested)
+                        .enter().append("rect")
+                        .attr("class", "bar")
+                        .attr("x", function(d) { return x(d.sales); })
+                        .attr("width", function(d) {
+                            return x(d.value);
+                        } )
+                        .attr("y", function(d) {
+                            return y(d.key);
+                        })
+                        .attr("height", '10px');
+
+                // add the x Axis
+                svg.append("g")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(x));
+
+                // add the y Axis
+                svg.append("g")
+                        .call(d3.axisLeft(y));
+
+
+                markers.on('click', onMapClick);
 
                 map.on('moveend', function() {
                     var contained = [];
 
-                    d3.select('div.chart svg').remove();
+                   // d3.select('div.chart svg').remove();
 
 
                     markers.eachLayer(function(l) {
@@ -254,17 +301,17 @@
                     nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
 
 
-                    var margin = {top: 20, right: 20, bottom: 30, left: 150},
-                            width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
-                            height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
-
-
-                    var svg = d3.select('div.chart').append('svg')
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                            .append("g")
-                            .attr("transform",
-                                    "translate(" + margin.left + "," + margin.top + ")");
+//                    var margin = {top: 0, right: 20, bottom: 30, left: 150},
+//                            width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
+//                            height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
+//
+//
+//                    var svg = d3.select('div.chart').append('svg')
+//                            .attr("width", width + margin.left + margin.right)
+//                            .attr("height", height + margin.top + margin.bottom)
+//                            .append("g")
+//                            .attr("transform",
+//                                    "translate(" + margin.left + "," + margin.top + ")");
 
 // set the ranges
 
@@ -272,7 +319,7 @@
                             .range([height, 0])
                             .padding(0.1);
 
-                    var x = d3.scaleLinear()
+                    var x = d3.scalePow().exponent(0.2)
                             .range([0, width]);
 
                     // Scale the range of the data in the domains
@@ -283,7 +330,9 @@
                     // append the rectangles for the bar chart
                     svg.selectAll(".bar")
                             .data(nested)
-                            .enter().append("rect")
+                            .transition() // Wait one second. Then brown, and remove.
+                            .delay(100)
+//                            .enter().append("rect")
                             .attr("class", "bar")
                             .attr("x", function(d) { return x(d.sales); })
                             .attr("width", function(d) {
@@ -295,13 +344,13 @@
                             .attr("height", '10px');
 
                     // add the x Axis
-                    svg.append("g")
-                            .attr("transform", "translate(0," + height + ")")
-                            .call(d3.axisBottom(x));
-
-                    // add the y Axis
-                    svg.append("g")
-                            .call(d3.axisLeft(y));
+//                    svg.append("g")
+//                            .attr("transform", "translate(0," + height + ")")
+//                            .call(d3.axisBottom(x));
+//
+//                    // add the y Axis
+//                    svg.append("g")
+//                            .call(d3.axisLeft(y));
 
 
                 });
