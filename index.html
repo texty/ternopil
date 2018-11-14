@@ -46,7 +46,7 @@
         }
 
         div.chart {
-            height: 50vh;
+            height: 30vh;
             margin-top: 5vh;
         }
     </style>
@@ -57,14 +57,14 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-7" id='map'></div>
+        <div class="col-8" id='map'></div>
         <!--<div id="infoHidden" class="">-->
             <!--<span class="close">&times;</span>-->
             <!--<h1 class="station"></h1>-->
             <!--<h3 class="line"></h3>-->
             <!--<h3 class="station_laying_type"></h3>-->
         <!--</div>-->
-        <div class="col-5">
+        <div class="col-4">
             <div class="chart"></div>
             <div class="info">
                 <h1></h1>
@@ -93,11 +93,25 @@
         id: 'mapbox.light'
     }).addTo(map);
 
-    d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQurj9lpDlTEJxa0CtZte_oiy2bKbpgoRu3Z6nEXGf7ERTTMglkAHePM1R_pQ5Jx5VnIeAWJomy1hdl/pub?gid=0&single=true&output=csv')
+    d3.csv('data/dataset.csv')
 
             .then(function(data) {
 
-                var checker
+                var local = d3.formatLocale ({
+                    "decimal": ".",
+                    "thousands": ",",
+                    "grouping": [3],
+                    "currency": ["", " грн."],
+                    "dateTime": "%a %b %e %X %Y",
+                    "date": "%m/%d/%Y",
+                    "time": "%H:%M:%S",
+                    "periods": ["AM", "PM"],
+                    "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                    "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                    "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                });
+
                 var geojson = data.map(function (d) {
                     return {
                         type: "Feature",
@@ -173,14 +187,15 @@
 
 
 
-                var namesOfWorks = ['Утеплення покрівлі','Заміна вікон та освітлення', 'Утеплення підїзду',
-                    'Утеплення під’їздів', 'Утоплення торця', 'Заміна мереж',
-                    'Утеплення торців', 'Ремонт теплових мереж', 'Встановлення ІТП',
-                    'Заміна вікон', 'Утеплення блоку', 'Утеплення стін', 'Утеплення будинку',
-                    'Кавітальний ремонт міжквартальних проїздів', 'Капітальний ремонт покрівлі',
-                    'Капітальний ремонт покрівель', 'Капітальний ремонт міжквартальних проїздів',
-                    'Капітальний ремонт прибудинкової території', 'sidewalk_repairment',
-                    'road_repairment'];
+                var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
+                    'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
+                    'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
+                    'Утеплення під’їздів', 'Утеплення блоку',
+                    'Капітальний ремонт прибудинкової території',
+                    'Капітальний ремонт покрівель',
+                    'Капітальний ремонт міжквартальних проїздів', 'Ремонт тротуарів',
+                    'Ремонт дороги'];
+
 
 
 
@@ -200,10 +215,12 @@
                 nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
 
 
-                var margin = {top: 0, right: 20, bottom: 30, left: 150},
-                        width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
+                var margin = {top: 0, right: 60, bottom: 30, left: 60},
+                        width = document.getElementsByClassName('chart')[0].offsetWidth- margin.left - margin.right,
                         height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
 
+
+                console.log(width);
 
                 var svg = d3.select('div.chart').append('svg')
                         .attr("width", width + margin.left + margin.right)
@@ -216,13 +233,18 @@
 
                 var y = d3.scaleBand()
                         .range([height, 0])
-                        .padding(0.1);
+                        .padding(1);
 
                 var x = d3.scalePow().exponent(0.2)
                         .range([0, width]);
 
+                var xMax = d3.max(nested, function(d){ return d.value; });
+                var xMedian = d3.median(nested, function(d){ return d.value; });
+                var percentile = d3.quantile(nested.map(d => d.value), 0.95);
+
+
                 // Scale the range of the data in the domains
-                x.domain([0, d3.max(nested, function(d){ return d.value; })]);
+                x.domain([0, xMax]);
                 y.domain(nested.map(function(d) { return d.key; }));
                 //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
 
@@ -243,11 +265,15 @@
                 // add the x Axis
                 svg.append("g")
                         .attr("transform", "translate(0," + height + ")")
-                        .call(d3.axisBottom(x));
+                        .attr('class', 'xAxis')
+                        .call(d3.axisBottom(x).tickFormat(local.format("$,.2f")).tickValues([xMedian, xMax]));
 
                 // add the y Axis
                 svg.append("g")
-                        .call(d3.axisLeft(y));
+                        .attr('class', 'yAxis')
+                        .call(d3.axisLeft(y))
+                        .selectAll(".tick text")
+                        .call(wrap, y.bandwidth());
 
 
                 markers.on('click', onMapClick);
@@ -274,14 +300,14 @@
 
 
 
-                    var namesOfWorks = ['Утеплення покрівлі','Заміна вікон та освітлення', 'Утеплення підїзду',
-                        'Утеплення під’їздів', 'Утоплення торця', 'Заміна мереж',
-                        'Утеплення торців', 'Ремонт теплових мереж', 'Встановлення ІТП',
-                        'Заміна вікон', 'Утеплення блоку', 'Утеплення стін', 'Утеплення будинку',
-                        'Кавітальний ремонт міжквартальних проїздів', 'Капітальний ремонт покрівлі',
-                        'Капітальний ремонт покрівель', 'Капітальний ремонт міжквартальних проїздів',
-                        'Капітальний ремонт прибудинкової території', 'sidewalk_repairment',
-                        'road_repairment'];
+                    var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
+                        'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
+                        'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
+                        'Утеплення під’їздів', 'Утеплення блоку',
+                        'Капітальний ремонт прибудинкової території',
+                        'Капітальний ремонт покрівель',
+                        'Капітальний ремонт міжквартальних проїздів', 'Ремонт тротуарів',
+                        'Ремонт дороги'];
 
 
 
@@ -322,8 +348,14 @@
                     var x = d3.scalePow().exponent(0.2)
                             .range([0, width]);
 
+                    var xMax = d3.max(nested, function(d){ return d.value; });
+                    var xMedian = d3.median(nested, function(d){ return d.value; });
+                    var percentile = d3.quantile(nested.map(d => d.value), 0.95);
+
+
+
                     // Scale the range of the data in the domains
-                    x.domain([0, d3.max(nested, function(d){ return d.value; })]);
+                    x.domain([0, xMax]);
                     y.domain(nested.map(function(d) { return d.key; }));
                     //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
 
@@ -343,20 +375,53 @@
                             })
                             .attr("height", '10px');
 
+
                     // add the x Axis
-//                    svg.append("g")
-//                            .attr("transform", "translate(0," + height + ")")
-//                            .call(d3.axisBottom(x));
-//
-//                    // add the y Axis
-//                    svg.append("g")
-//                            .call(d3.axisLeft(y));
+                    d3.selectAll('.xAxis')
+                            .transition() // Wait one second. Then brown, and remove.
+                            .delay(100)
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(x).tickFormat(local.format("$,.2f")).tickValues([xMedian, xMax]));
+
+                    // add the y Axis
+                    d3.selectAll('.yAxis')
+                            .transition() // Wait one second. Then brown, and remove.
+                            .delay(100)
+                            .call(d3.axisLeft(y))
+                            .selectAll(".tick text")
+                            .call(wrap, y.bandwidth());
+
 
 
                 });
 
 
             });
+
+
+    function wrap(text, width) {
+        text.each(function() {
+            var text = d3.select(this),
+                    words = text.text().split(/\s+/).reverse(),
+                    word,
+                    line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.1, // ems
+                    y = text.attr("y"),
+                    dy = parseFloat(text.attr("dy")),
+                    tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }
 
 
 
