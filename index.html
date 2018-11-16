@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+    <script src="lib/d3.jetpack.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="lib/leaflet-control-window/src/L.Control.Window.js"></script>
 
     <!--Bootstrap-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -28,11 +28,35 @@
             /*height: 100%;*/
             /*margin: 0;*/
         /*}*/
-        #map {
+
+
+        div.container {
+            max-width: 1500px;
+        }
+
+        div#map {
             /*width: 600px;*/
             height: 90vh;
             margin-top: 5vh;
         }
+
+        div.col-6:nth-child(1) {
+            padding-left: 5vh;
+
+        }
+
+        div#chart {
+            padding-left: 5vh;
+        }
+
+        div.col-7 {
+            margin-left: 5vh;
+        }
+
+        div.info {
+            width: 80%;
+        }
+
         div#infoHidden {
             position: fixed;
             z-index: 1000;
@@ -46,9 +70,30 @@
         }
 
         div.chart {
-            height: 30vh;
+            height: 50vh;
             margin-top: 5vh;
+            /*margin-left: 5vh;*/
         }
+
+        div.line {
+            height: 50vh;
+        }
+
+        div.container {
+            margin: 0;
+        }
+
+        .area {
+            fill: steelblue;
+            clip-path: url(#clip);
+        }
+
+        .zoom {
+            cursor: move;
+            fill: none;
+            pointer-events: all;
+        }
+
     </style>
 
 
@@ -57,22 +102,18 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-8" id='map'></div>
-        <!--<div id="infoHidden" class="">-->
-            <!--<span class="close">&times;</span>-->
-            <!--<h1 class="station"></h1>-->
-            <!--<h3 class="line"></h3>-->
-            <!--<h3 class="station_laying_type"></h3>-->
-        <!--</div>-->
-        <div class="col-4">
+        <div class="col-6">
+            <div id="map"></div>
+        </div>
+        <div id="chart" class="col-6">
             <div class="chart"></div>
+            <!--<div class="line"></div>-->
             <div class="info">
                 <h1></h1>
                 <p class="repairment_company"></p>
+                <p class="year"></p>
                 <p class="work_type"></p>
                 <p class="cost"></p>
-                <p class="year"></p>
-                <p class="adress"></p>
             </div>
         </div>
 
@@ -81,351 +122,11 @@
 </div>
 
 
-<script>
-    var map = L.map('map').setView([49.551159, 25.593465], 8);
+<!--js files-->
+<script src="js/main.js"></script>
+<!--<script src="js/brush.js"></script>-->
 
 
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-        maxZoom: 18,
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        id: 'mapbox.light'
-    }).addTo(map);
-
-    d3.csv('data/dataset.csv')
-
-            .then(function(data) {
-
-                var local = d3.formatLocale ({
-                    "decimal": ".",
-                    "thousands": ",",
-                    "grouping": [3],
-                    "currency": ["", " грн."],
-                    "dateTime": "%a %b %e %X %Y",
-                    "date": "%m/%d/%Y",
-                    "time": "%H:%M:%S",
-                    "periods": ["AM", "PM"],
-                    "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-                    "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-                    "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                });
-
-                var geojson = data.map(function (d) {
-                    return {
-                        type: "Feature",
-                        properties: d,
-                        geometry: {
-                            type: "Point",
-                            coordinates: [+d.Longitude, +d.Latitude]
-                        }
-                    }
-                });
-
-                function style(feature) {
-                return {
-//                    weight: 2,
-                    opacity: 1,
-//                    color: 'white',
-//                    dashArray: '3',
-                    color: '#ffffff',
-                    fillOpacity: 0.7,
-                    fillColor: scaleColor(+feature.properties.cost)
-                };
-            }
-
-                function scaleColor(x) {
-                    var scale = d3.scaleLinear()
-                            .domain([0, 5000000])
-                            .range([0, 1]);
-                    return d3.interpolateReds(scale(x));
-                }
-
-                var markers = L.geoJSON(geojson,
-                        {
-                    pointToLayer: function (feature, latlng) {
-                        return L.circleMarker(latlng, style(feature)
-                        );
-                    }
-                }
-                ).addTo(map);
-
-//
-
-                function onMapClick(e) {
-                    d3.select('div.info h3').text(e.sourceTarget.feature.properties.work_type.toString())
-
-                    d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString())
-                    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString())
-                    d3.select('div.info p.cost').text(e.sourceTarget.feature.properties.cost.toString() + ' грн.')
-                    d3.select('div.info p.year').text(e.sourceTarget.feature.properties.year.toString())
-                    d3.select('div.info p.adress').text(e.sourceTarget.feature.properties.street_name_geocode.replace('Україна, Тернопіль, ', ''))
-
-
-
-                }
-
-                var contained = [];
-
-                // d3.select('div.chart svg').remove();
-
-
-                markers.eachLayer(function(l) {
-                    if( map.getBounds().contains(l.getLatLng()) )
-                        contained.push(l);
-                });
-
-                var dataForChart = contained.map(function (d) {
-                    return d.feature.properties
-                });
-
-                var nested = d3.nest()
-                        .key(function(d) { return d.work_type; })
-                        .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
-                        .entries(dataForChart);
-
-
-
-                var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
-                    'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
-                    'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
-                    'Утеплення під’їздів', 'Утеплення блоку',
-                    'Капітальний ремонт прибудинкової території',
-                    'Капітальний ремонт покрівель',
-                    'Капітальний ремонт міжквартальних проїздів', 'Ремонт тротуарів',
-                    'Ремонт дороги'];
-
-
-
-
-
-                var a = nested.map(d => d.key)
-                namesOfWorks.forEach(function(d) {
-
-                    if (a.includes(d))
-                    {
-
-                    }
-                    else {
-                        nested.push( {'key':d, 'value':0} )
-                    }
-                });
-
-                nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
-
-
-                var margin = {top: 0, right: 60, bottom: 30, left: 60},
-                        width = document.getElementsByClassName('chart')[0].offsetWidth- margin.left - margin.right,
-                        height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
-
-
-                console.log(width);
-
-                var svg = d3.select('div.chart').append('svg')
-                        .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
-                        .append("g")
-                        .attr("transform",
-                                "translate(" + margin.left + "," + margin.top + ")");
-
-// set the ranges
-
-                var y = d3.scaleBand()
-                        .range([height, 0])
-                        .padding(1);
-
-                var x = d3.scalePow().exponent(0.2)
-                        .range([0, width]);
-
-                var xMax = d3.max(nested, function(d){ return d.value; });
-                var xMedian = d3.median(nested, function(d){ return d.value; });
-                var percentile = d3.quantile(nested.map(d => d.value), 0.95);
-
-
-                // Scale the range of the data in the domains
-                x.domain([0, xMax]);
-                y.domain(nested.map(function(d) { return d.key; }));
-                //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
-
-                // append the rectangles for the bar chart
-                svg.selectAll(".bar")
-                        .data(nested)
-                        .enter().append("rect")
-                        .attr("class", "bar")
-                        .attr("x", function(d) { return x(d.sales); })
-                        .attr("width", function(d) {
-                            return x(d.value);
-                        } )
-                        .attr("y", function(d) {
-                            return y(d.key);
-                        })
-                        .attr("height", '10px');
-
-                // add the x Axis
-                svg.append("g")
-                        .attr("transform", "translate(0," + height + ")")
-                        .attr('class', 'xAxis')
-                        .call(d3.axisBottom(x).tickFormat(local.format("$,.2f")).tickValues([xMedian, xMax]));
-
-                // add the y Axis
-                svg.append("g")
-                        .attr('class', 'yAxis')
-                        .call(d3.axisLeft(y))
-                        .selectAll(".tick text")
-                        .call(wrap, y.bandwidth());
-
-
-                markers.on('click', onMapClick);
-
-                map.on('moveend', function() {
-                    var contained = [];
-
-                   // d3.select('div.chart svg').remove();
-
-
-                    markers.eachLayer(function(l) {
-                        if( map.getBounds().contains(l.getLatLng()) )
-                            contained.push(l);
-                    });
-
-                    var dataForChart = contained.map(function (d) {
-                        return d.feature.properties
-                    });
-
-                    var nested = d3.nest()
-                            .key(function(d) { return d.work_type; })
-                            .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
-                            .entries(dataForChart);
-
-
-
-                    var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
-                        'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
-                        'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
-                        'Утеплення під’їздів', 'Утеплення блоку',
-                        'Капітальний ремонт прибудинкової території',
-                        'Капітальний ремонт покрівель',
-                        'Капітальний ремонт міжквартальних проїздів', 'Ремонт тротуарів',
-                        'Ремонт дороги'];
-
-
-
-
-                    var a = nested.map(d => d.key)
-                    namesOfWorks.forEach(function(d) {
-
-                        if (a.includes(d))
-                        {
-
-                        }
-                        else {
-                            nested.push( {'key':d, 'value':0} )
-                        }
-                    });
-
-                    nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
-
-
-//                    var margin = {top: 0, right: 20, bottom: 30, left: 150},
-//                            width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
-//                            height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
-//
-//
-//                    var svg = d3.select('div.chart').append('svg')
-//                            .attr("width", width + margin.left + margin.right)
-//                            .attr("height", height + margin.top + margin.bottom)
-//                            .append("g")
-//                            .attr("transform",
-//                                    "translate(" + margin.left + "," + margin.top + ")");
-
-// set the ranges
-
-                    var y = d3.scaleBand()
-                            .range([height, 0])
-                            .padding(0.1);
-
-                    var x = d3.scalePow().exponent(0.2)
-                            .range([0, width]);
-
-                    var xMax = d3.max(nested, function(d){ return d.value; });
-                    var xMedian = d3.median(nested, function(d){ return d.value; });
-                    var percentile = d3.quantile(nested.map(d => d.value), 0.95);
-
-
-
-                    // Scale the range of the data in the domains
-                    x.domain([0, xMax]);
-                    y.domain(nested.map(function(d) { return d.key; }));
-                    //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
-
-                    // append the rectangles for the bar chart
-                    svg.selectAll(".bar")
-                            .data(nested)
-                            .transition() // Wait one second. Then brown, and remove.
-                            .delay(100)
-//                            .enter().append("rect")
-                            .attr("class", "bar")
-                            .attr("x", function(d) { return x(d.sales); })
-                            .attr("width", function(d) {
-                                return x(d.value);
-                            } )
-                            .attr("y", function(d) {
-                                return y(d.key);
-                            })
-                            .attr("height", '10px');
-
-
-                    // add the x Axis
-                    d3.selectAll('.xAxis')
-                            .transition() // Wait one second. Then brown, and remove.
-                            .delay(100)
-                            .attr("transform", "translate(0," + height + ")")
-                            .call(d3.axisBottom(x).tickFormat(local.format("$,.2f")).tickValues([xMedian, xMax]));
-
-                    // add the y Axis
-                    d3.selectAll('.yAxis')
-                            .transition() // Wait one second. Then brown, and remove.
-                            .delay(100)
-                            .call(d3.axisLeft(y))
-                            .selectAll(".tick text")
-                            .call(wrap, y.bandwidth());
-
-
-
-                });
-
-
-            });
-
-
-    function wrap(text, width) {
-        text.each(function() {
-            var text = d3.select(this),
-                    words = text.text().split(/\s+/).reverse(),
-                    word,
-                    line = [],
-                    lineNumber = 0,
-                    lineHeight = 1.1, // ems
-                    y = text.attr("y"),
-                    dy = parseFloat(text.attr("dy")),
-                    tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-            while (word = words.pop()) {
-                line.push(word);
-                tspan.text(line.join(" "));
-                if (tspan.node().getComputedTextLength() > width) {
-                    line.pop();
-                    tspan.text(line.join(" "));
-                    line = [word];
-                    tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-                }
-            }
-        });
-    }
-
-
-
-</script>
 
 
 
