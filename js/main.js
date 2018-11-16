@@ -169,7 +169,7 @@ d3.csv('data/dataset.csv')
             .attr("class", "bar")
             .attr("x", function(d) { return x(d.sales); })
             .attr('fill', function (d) {
-                return scaleColor(d.value)
+                return 'rgb(103, 0, 13)'
             })
             .attr("width", function(d) {
                 return x(d.value);
