@@ -1,4 +1,6 @@
-var map = L.map('map').setView([49.551159, 25.593465], 14);
+var nested, nested_updated;
+
+var map = L.map('map').setView([49.551159, 25.593465],8);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -8,10 +10,45 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
     id: 'mapbox.light'
 }).addTo(map);
 
+
+// time scale for line chart not currently used
+// var timeScale = d3.scaleLinear()
+//     .domain([2012, 2018])
+//     .range([0.1, 1]);
+
+
+//defined style for layer, may use it if I'll need several layers
+function style(feature) {
+    return {
+        color: 'white',
+        fill: scaleColor(+feature.properties.cost),
+        fillOpacity: 1,
+        fillColor: scaleColor(+feature.properties.cost)
+    };
+}
+
+// defined color scale
+function scaleColor(x) {
+    var scale = d3.scaleLinear()
+        .domain([0, 5000000])
+        .range([0, 1]);
+    return d3.interpolateReds(scale(x));
+}
+
 d3.csv('data/dataset.csv')
     .then(function(data) {
 
+        const innitialData = [
+            {'key':'Утеплення торців', 'value':0}, {'key':'Утеплення будинку', 'value':0},
+            {'key':'Встановлення ІТП', 'value':0}, {'key':'Заміна вікон', 'value':0},
+            {'key':'Заміна вікон та освітлення', 'value':0}, {'key':'Утеплення стін', 'value':0},
+            {'key':'Заміна мереж', 'value':0}, {'key':'Утеплення покрівлі', 'value':0},
+            {'key':'Ремонт теплових мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
+            {'key':'Утеплення блоку', 'value':0}, {'key':'Ремонт тротуарів', 'value':0},
+            {'key':'Ремонт дороги', 'value':0}
+        ];
 
+        // defined local option for time and currency ticks
         var local = d3.formatLocale ({
             "decimal": ".",
             "thousands": ",",
@@ -27,7 +64,7 @@ d3.csv('data/dataset.csv')
             "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         });
 
-
+        // created geojson out of basic data
         var geojson = data.map(function (d) {
             return {
                 type: "Feature",
@@ -39,97 +76,18 @@ d3.csv('data/dataset.csv')
             }
         });
 
-        var timeScale = d3.scaleLinear()
-            .domain([2012, 2018])
-            .range([0.1, 1]);
 
-        function style(feature) {
-            return {
-                // weight: 2,
-                // opacity: 1,
-                color: 'white',
-                fill: scaleColor(+feature.properties.cost),
-                fillOpacity: 1,
-                fillColor: scaleColor(+feature.properties.cost)
-            };
-        }
-
-        function scaleColor(x) {
-            var scale = d3.scaleLinear()
-                .domain([0, 5000000])
-                .range([0, 1]);
-            return d3.interpolateReds(scale(x));
-        }
-
-        var markers = L.geoJSON(geojson,
-            {
+        //created leaflet markers
+        var markers = L.geoJSON(geojson,{
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, style(feature)
                     );
                 }
-            }
-        ).addTo(map);
+            })
+            .addTo(map);
 
-//
-
-        function onMapClick(e) {
-
-            d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
-                                                            + e.sourceTarget.feature.properties.repairment_company.toString());
-            d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
-            d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
-            d3.select('div.info p.cost').text(
-                e.sourceTarget.feature.properties.cost.toString() == '' ?
-                    'Немає даних про вартість.' :
-                d3.format(',.2r')(e.sourceTarget.feature.properties.cost) + ' грн.')
-
-
-        }
-
-        var contained = [];
-
-        // d3.select('div.chart svg').remove();
-
-
-        markers.eachLayer(function(l) {
-            if( map.getBounds().contains(l.getLatLng()) )
-                contained.push(l);
-        });
-
-        var dataForChart = contained.map(function (d) {
-            return d.feature.properties
-        });
-
-        var nested = d3.nest()
-            .key(function(d) { return d.work_type; })
-            .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
-            .entries(dataForChart);
-
-
-
-        var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
-            'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
-            'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
-            'Утеплення під’їздів', 'Утеплення блоку', 'Ремонт тротуарів',
-            'Ремонт дороги'];
-        //
-        // var namesOfWorks = ['Ремонт доріг і тротуарів', 'Утеплення', 'Ремонт будинків'];
-
-
-        var a = nested.map(d => d.key)
-        namesOfWorks.forEach(function(d) {
-
-            if (a.includes(d))
-            {
-
-            }
-            else {
-                nested.push( {'key':d, 'value':0} )
-            }
-        });
-
-        nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value))
-
+        //nested data to build bars
+        prepareData(markers, innitialData);
 
         var margin = {top: 0, right: 60, bottom: 30, left: 170},
             width = document.getElementsByClassName('chart')[0].offsetWidth * 0.8 - margin.left - margin.right,
@@ -143,8 +101,6 @@ d3.csv('data/dataset.csv')
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
 
-// set the ranges
-
         var y = d3.scaleBand()
             .range([height, 0])
             .padding(.5);
@@ -152,32 +108,9 @@ d3.csv('data/dataset.csv')
         var x = d3.scalePow().exponent(0.2)
             .range([0, width]);
 
-        var xMax = d3.max(nested, function(d){ return d.value; });
-        var xMedian = d3.median(nested, function(d){ return d.value; });
-        var percentile = d3.quantile(nested.map(d => d.value), 0.95);
-
-
-        // Scale the range of the data in the domains
-        x.domain([0, xMax]);
-        y.domain(nested.map(function(d) { return d.key; }));
-        //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
-
-        // append the rectangles for the bar chart
-        svg.selectAll(".bar")
-            .data(nested)
-            .enter().append("rect")
-            .attr("class", "bar")
-            .attr("x", function(d) { return x(d.sales); })
-            .attr('fill', function (d) {
-                return 'rgb(103, 0, 13)'
-            })
-            .attr("width", function(d) {
-                return x(d.value);
-            } )
-            .attr("y", function(d) {
-                return y(d.key);
-            })
-            .attr("height", y.bandwidth());
+        var xMax = d3.max(innitialData, function(d){ return d.value; });
+        var xMedian = d3.median(innitialData, function(d){ return d.value; });
+        var percentile = d3.quantile(innitialData.map(d => d.value), 0.95);
 
         // add the x Axis
         svg.append("g")
@@ -188,132 +121,48 @@ d3.csv('data/dataset.csv')
         // add the y Axis
         svg.append("g")
             .attr('class', 'yAxis')
-            // .attr("transform", "translate(" + -5 + ",0)")
             .call(d3.axisLeft(y))
             .selectAll(".tick text")
             .style("text-anchor", "start")
-            .attr("transform", "translate(" + -155 + ",0)")
+            .attr("transform", "translate(" + -155 + ",0)");
             // .call(wrap, margin.left);
 
 
+        updateBarChart(height, local, x, y, svg, innitialData, xMax, xMedian);
+        
+
+
+        // Хотів додати лінійний графік для часу, але він погано виглядає і безтолковий
         // createBrush(dataForChart)
+
+
+        //EVENTS
+        //////////////
 
         markers.on('click', onMapClick);
 
+        // here I defined bar chart update after zoom or mouse move;
         map.on('moveend', function() {
-            var contained = [];
+            prepareData(markers, innitialData);
 
-            // d3.select('div.chart svg').remove();
-
-
-            markers.eachLayer(function(l) {
-                if( map.getBounds().contains(l.getLatLng()) )
-                    contained.push(l);
-            });
-
-            var dataForChart = contained.map(function (d) {
-                return d.feature.properties
-            });
-
-            var nested = d3.nest()
-                .key(function(d) { return d.work_type; })
-                .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
-                .entries(dataForChart);
-
-
-
-            var namesOfWorks = ['Утеплення торців', 'Утеплення будинку', 'Встановлення ІТП',
-                'Заміна вікон', 'Заміна вікон та освітлення', 'Утеплення стін',
-                'Заміна мереж', 'Утеплення покрівлі', 'Ремонт теплових мереж',
-                'Утеплення під’їздів', 'Утеплення блоку', 'Ремонт тротуарів',
-                'Ремонт дороги'];
-            //
-
-            // var namesOfWorks = ['Ремонт доріг і тротуарів', 'Утеплення', 'Ремонт будинків'];
-
-            var a = nested.map(d => d.key);
-            namesOfWorks.forEach(function(d) {
-
-                if (a.includes(d))
-                {
-
-                }
-                else {
-                    nested.push( {'key':d, 'value':0} )
-                }
-            });
-
-            nested.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
-
-
-//                    var margin = {top: 0, right: 20, bottom: 30, left: 150},
-//                            width = document.getElementsByClassName('chart')[0].offsetWidth - margin.left - margin.right,
-//                            height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
-//
-//
-//                    var svg = d3.select('div.chart').append('svg')
-//                            .attr("width", width + margin.left + margin.right)
-//                            .attr("height", height + margin.top + margin.bottom)
-//                            .append("g")
-//                            .attr("transform",
-//                                    "translate(" + margin.left + "," + margin.top + ")");
-
-// set the ranges
-
-            var y = d3.scaleBand()
-                .range([height, 0])
-                .padding(.5);
-
-            var x = d3.scalePow().exponent(0.2)
-                .range([0, width]);
-
-            var xMax = d3.max(nested, function(d){ return d.value; });
-            var xMedian = d3.median(nested, function(d){ return d.value; });
-            var percentile = d3.quantile(nested.map(d => d.value), 0.95);
+            var xMax = d3.max(innitialData, function(d){ return d.value; });
+            var xMedian = d3.median(innitialData, function(d){ return d.value; });
+            //var percentile = d3.quantile(nested.map(d => d.value), 0.95);
 
             // Scale the range of the data in the domains
             x.domain([0, xMax]);
-            y.domain(nested.map(function(d) { return d.key; }));
-            //y.domain([0, d3.max(data, function(d) { return d.sales; })]);
+            y.domain(innitialData.map(function(d) { return d.key; }));
 
-            // append the rectangles for the bar chart
-            svg.selectAll(".bar")
-                .data(nested)
-                .transition() // Wait one second. Then brown, and remove.
-                .delay(100)
-                //                            .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", function(d) { return x(d.sales); })
-                .attr("width", function(d) {
-                    return x(d.value);
-                } )
-                .attr("y", function(d) {
-                    return y(d.key);
-                })
-                .attr("height", y.bandwidth());
-
-
-            // add the x Axis
-            d3.selectAll('.xAxis')
-                .transition() // Wait one second. Then brown, and remove.
-                .delay(100)
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
-
-            // add the y Axis
-            d3.selectAll('.yAxis')
-                .transition() // Wait one second. Then brown, and remove.
-                .duration(100)
-                .call(d3.axisLeft(y))
-                .selectAll(".tick text")
-                .style("text-anchor", "start")
-                .attr("transform", "translate(" + -155 + ",0)");
-            // .call(wrap, margin.left);
-
+            updateBarChart(height,local, x, y, svg, innitialData, xMax, xMedian);
+            
         });
+        
+        ///////////////
+        
     });
 
 
+// NOT USING, wrapping long tick names
 function wrap(text, width) {
     text.each(function () {
         var text = d3.select(this),
@@ -339,4 +188,47 @@ function wrap(text, width) {
         }
     });
 
+}
+
+// function transforms data from bounding box of the screen into nested format suitable for the chart builder
+function prepareData(markers, innitialData) {
+    var contained = [];
+
+    window.oldData = innitialData
+
+    markers.eachLayer(function(l) {
+        if( map.getBounds().contains(l.getLatLng()) )
+            contained.push(l);
+    });
+
+    var dataForChart = contained.map(function (d) {
+        return d.feature.properties
+    });
+
+    var nested = d3.nest()
+        .key(function(d) { return d.work_type; })
+        .rollup(function(leaves) { return d3.sum(leaves, function(d) {return parseFloat(d.cost)}) })
+        .map(dataForChart);
+    
+
+    for (var i in innitialData) {
+        innitialData[i].value = nested['$' + innitialData[i].key] == undefined ? 0 : nested['$' + innitialData[i].key];
+    }
+
+    innitialData.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
+    
+}
+
+
+// function to add detailed info about each work on click;
+function onMapClick(e) {
+
+    d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
+    + e.sourceTarget.feature.properties.repairment_company.toString());
+    d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
+    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
+    d3.select('div.info p.cost').text(
+        e.sourceTarget.feature.properties.cost.toString() == '' ?
+            'Немає даних про вартість.' :
+        d3.format(',.2r')(e.sourceTarget.feature.properties.cost) + ' грн.')
 }
