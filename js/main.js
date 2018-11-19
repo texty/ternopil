@@ -114,10 +114,10 @@ d3.csv('data/dataset.csv')
         var percentile = d3.quantile(innitialData.map(d => d.value), 0.95);
 
         // add the x Axis
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .attr('class', 'xAxis')
-            .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
+        // svg.append("g")
+        //     .attr("transform", "translate(0," + height + ")")
+        //     .attr('class', 'xAxis')
+        //     .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
 
         // add the y Axis
         svg.append("g")
@@ -231,5 +231,19 @@ function onMapClick(e) {
     d3.select('div.info p.cost').text(
         e.sourceTarget.feature.properties.cost.toString() == '' ?
             'Немає даних про вартість.' : 'Вартість: ' +
-        d3.format(',.2r')(e.sourceTarget.feature.properties.cost) + ' грн.')
+        formatSIPrefixed(d3.format('.2s')(e.sourceTarget.feature.properties.cost)))
+}
+
+function formatSIPrefixed(string) {
+    if (string.includes('G')) {
+        string = string.replace('G', ' млрд.')
+    }
+    if (string.includes('M')) {
+        string = string.replace('M', ' млн.')
+    }
+    if (string.includes('k')) {
+        string = string.replace('k', ' тис.')
+    }
+
+    return string
 }

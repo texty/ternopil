@@ -64,7 +64,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .attr("x", d => x(d.value) + 25)
         .attr("y", d => y(d.key) + y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .text(d => local.format(",.2r")(d.value));
+        .text(d => formatSIPrefixed(local.format(".2s")(d.value)));
 
     textUpd.exit().remove();
 
