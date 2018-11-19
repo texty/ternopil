@@ -89,7 +89,7 @@ d3.csv('data/dataset.csv')
         //nested data to build bars
         prepareData(markers, innitialData);
 
-        var margin = {top: 0, right: 80, bottom: 30, left: 220},
+        var margin = {top: 0, right: 80, bottom: 5, left: 220},
             width = document.getElementsByClassName('chart')[0].offsetWidth * 0.9 - margin.left - margin.right,
             height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
 

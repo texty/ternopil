@@ -28,7 +28,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .enter()
         .append("rect")
         .attr('class', 'bars')
-        .attr("height", y.bandwidth());
+        .attr("height", y.bandwidth() * 0.7);
 
     barsUpd.merge(barsEnter)
         .attr("x", function(d) { return 0; })
@@ -64,7 +64,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .attr("x", d => x(d.value) + 25)
         .attr("y", d => y(d.key) + y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .text(d => local.format("$,.2r")(d.value));
+        .text(d => local.format(",.2r")(d.value));
 
     textUpd.exit().remove();
 

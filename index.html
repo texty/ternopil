@@ -30,15 +30,26 @@
         }
 
         div#main {
+            padding-top: 2rem;
             height: 80vh;
         }
 
         div#header {
             height: 10vh;
+            padding-left: 5vh;
+            padding-top: 2vh;
         }
 
+        div.col-12 > p {
+            width: 50%;
+            font-size: .8rem;
+            color: grey;
+        }
 
-
+        div.info > p {
+            font-size: .8rem;
+            color: grey;
+        }
 
         text {
             font-size: 1rem;
@@ -134,8 +145,11 @@
 
 <div class="container">
     <div class="row" id="header">
-        <h3>Блаблабла</h3>
-        <p>І блаблабла</p>
+        <div class="col-12">
+            <h5>Карта комунальних ремонтів м. Тернопіль (Назва попередня!!)</h5>
+            <p>Дивіться, що ремонтували у Тернополі за бюджетні кошти. Графік показує загальну суму ремонтів які зараз на
+            екрані. Натискайте на точки, щоб побачити детальний опис кожного ремонту.</p>
+        </div>
     </div>
     <div class="row" id="main">
         <div class="col-6">
@@ -146,7 +160,7 @@
                 <h5>Вартість робіт (що зараз на екрані) грн.</h5>
             </div>
             <div class="info">
-                <h5>Натисніть на точку, щоб побачити деталі.</h5>
+                <h5></h5>
                 <p class="repairment_company"></p>
                 <p class="year"></p>
                 <p class="work_type"></p>
