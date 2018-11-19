@@ -24,8 +24,18 @@
 
 
     <style>
+
+        line, path.domain {
+            opacity: 0;
+        }
+
+
         text {
             font-size: 1rem;
+        }
+
+        div.chart h5 {
+            margin-bottom: 1rem;
         }
 
 
@@ -118,7 +128,9 @@
             <div id="map"></div>
         </div>
         <div id="chart" class="col-6">
-            <div class="chart"></div>
+            <div class="chart">
+                <h5>Вартість робіт (що зараз на екрані) грн.</h5>
+            </div>
             <div class="info">
                 <h5>Натисніть на точку, щоб побачити деталі.</h5>
                 <p class="repairment_company"></p>

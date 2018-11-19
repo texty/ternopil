@@ -106,6 +106,8 @@ d3.csv('data/dataset.csv')
 
         var x = d3.scalePow().exponent(0.2)
             .range([0, width]);
+        
+        var ticks = svg.append("g").attr('class', 'ticks')
 
         var xMax = d3.max(innitialData, function(d){ return d.value; });
         var xMedian = d3.median(innitialData, function(d){ return d.value; });

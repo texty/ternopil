@@ -41,8 +41,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
             return x(d.value);
         })
         .attr('fill', function (d) {
-            return 'rgb(103, 0, 13)';
-            // return scaleColor(d.value);
+            return 'black';
         })
         .attr("y", function(d) {
             return y(d.key);
@@ -50,13 +49,33 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
 
     barsUpd.exit().remove();
 
+
+    var textUpd = svg.selectAll(".textTick")
+        .data(data);
+
+    var textEnter = textUpd
+        .enter()
+        .append("text")
+        .attr('class', 'textTick')
+        .style("font", "10px sans-serif");
+
+    textUpd.merge(textEnter)
+        .attr("fill", "grey")
+        .attr("x", d => x(d.value) + 25)
+        .attr("y", d => y(d.key) + y.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .text(d => local.format("$,.2r")(d.value));
+
+    textUpd.exit().remove();
+
+
 // add the x Axis
-    svg.select('.xAxis')
-        .attr("transform", "translate(0," + height + ")")
-        .attr('class', 'xAxis')
-        .transition()
-        .duration(500)
-        .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
+//     svg.select('.xAxis')
+//         .attr("transform", "translate(0," + height + ")")
+//         .attr('class', 'xAxis')
+//         .transition()
+//         .duration(500)
+//         .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
 
 // add the y Axis
     svg.select('.yAxis')
@@ -65,7 +84,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .call(d3.axisLeft(y))
         .selectAll(".tick text")
         .style("text-anchor", "start")
-        .attr("transform", "translate(" + -200 + ",0)");
+        .attr("transform", "translate(" + -210 + ",0)");
 
 
 }
