@@ -9,6 +9,13 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
     x.domain([0, xMax]);
     y.domain(data.map(function(d) { return d.key; }));
 
+    function scaleColor(x) {
+        var scale = d3.scaleLog()
+            .domain([1, 500000000])
+            .range([0, 1]);
+        return d3.interpolateReds(scale(x));
+    }
+
 // append the rectangles for the bar chart
 
 
@@ -20,11 +27,8 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
     var barsEnter = barsUpd
         .enter()
         .append("rect")
-        .attr('class', 'enter')
-        .attr("height", y.bandwidth())
-        .attr('fill', function (d) {
-            return 'rgb(103, 0, 13)'
-        });
+        .attr('class', 'bars')
+        .attr("height", y.bandwidth());
 
     barsUpd.merge(barsEnter)
         .attr("x", function(d) { return 0; })
@@ -37,7 +41,8 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
             return x(d.value);
         })
         .attr('fill', function (d) {
-            return 'rgb(103, 0, 13)'
+            return 'rgb(103, 0, 13)';
+            // return scaleColor(d.value);
         })
         .attr("y", function(d) {
             return y(d.key);
@@ -57,7 +62,10 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
     svg.select('.yAxis')
         .transition() // Wait one second. Then brown, and remove.
         .duration(500)
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+        .selectAll(".tick text")
+        .style("text-anchor", "start")
+        .attr("transform", "translate(" + -200 + ",0)");
 
 
 }

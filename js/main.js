@@ -41,9 +41,9 @@ d3.csv('data/dataset.csv')
         const innitialData = [
             {'key':'Утеплення торців', 'value':0}, {'key':'Утеплення будинку', 'value':0},
             {'key':'Встановлення ІТП', 'value':0}, {'key':'Заміна вікон', 'value':0},
-            {'key':'Заміна вікон та освітлення', 'value':0}, {'key':'Утеплення стін', 'value':0},
+            {'key':'Заміна вікон та освітл.', 'value':0}, {'key':'Утеплення стін', 'value':0},
             {'key':'Заміна мереж', 'value':0}, {'key':'Утеплення покрівлі', 'value':0},
-            {'key':'Ремонт теплових мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
+            {'key':'Ремонт тепл. мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
             {'key':'Утеплення блоку', 'value':0}, {'key':'Ремонт тротуарів', 'value':0},
             {'key':'Ремонт дороги', 'value':0}
         ];
@@ -89,8 +89,8 @@ d3.csv('data/dataset.csv')
         //nested data to build bars
         prepareData(markers, innitialData);
 
-        var margin = {top: 0, right: 60, bottom: 30, left: 170},
-            width = document.getElementsByClassName('chart')[0].offsetWidth * 0.8 - margin.left - margin.right,
+        var margin = {top: 0, right: 80, bottom: 30, left: 220},
+            width = document.getElementsByClassName('chart')[0].offsetWidth * 0.9 - margin.left - margin.right,
             height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
 
 
@@ -98,8 +98,7 @@ d3.csv('data/dataset.csv')
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
         var y = d3.scaleBand()
             .range([height, 0])
@@ -121,10 +120,10 @@ d3.csv('data/dataset.csv')
         // add the y Axis
         svg.append("g")
             .attr('class', 'yAxis')
-            .call(d3.axisLeft(y))
-            .selectAll(".tick text")
-            .style("text-anchor", "start")
-            .attr("transform", "translate(" + -155 + ",0)");
+            .call(d3.axisLeft(y));
+            // .selectAll(".tick text")
+            // .style("text-anchor", "start")
+            // .attr("transform", "translate(" + -155 + ",0)");
             // .call(wrap, margin.left);
 
 
@@ -193,9 +192,7 @@ function wrap(text, width) {
 // function transforms data from bounding box of the screen into nested format suitable for the chart builder
 function prepareData(markers, innitialData) {
     var contained = [];
-
-    window.oldData = innitialData
-
+    
     markers.eachLayer(function(l) {
         if( map.getBounds().contains(l.getLatLng()) )
             contained.push(l);
@@ -223,12 +220,14 @@ function prepareData(markers, innitialData) {
 // function to add detailed info about each work on click;
 function onMapClick(e) {
 
+
+    d3.select('div.info h5').text('Деталі робіт')
     d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
     + e.sourceTarget.feature.properties.repairment_company.toString());
     d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
     d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
     d3.select('div.info p.cost').text(
         e.sourceTarget.feature.properties.cost.toString() == '' ?
-            'Немає даних про вартість.' :
+            'Немає даних про вартість.' : 'Вартість: ' + 
         d3.format(',.2r')(e.sourceTarget.feature.properties.cost) + ' грн.')
 }

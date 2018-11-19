@@ -24,10 +24,9 @@
 
 
     <style>
-        /*html, body {*/
-            /*height: 100%;*/
-            /*margin: 0;*/
-        /*}*/
+        text {
+            font-size: 1rem;
+        }
 
 
         div.container {
@@ -83,16 +82,29 @@
             margin: 0;
         }
 
-        .area {
-            fill: steelblue;
-            clip-path: url(#clip);
+        div.info {
+            margin-top: 3rem;
         }
 
-        .zoom {
-            cursor: move;
-            fill: none;
-            pointer-events: all;
+        div.info h5 {
+            margin-bottom: 1rem;
         }
+
+        div.info p {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        /*.area {*/
+            /*fill: steelblue;*/
+            /*clip-path: url(#clip);*/
+        /*}*/
+
+        /*.zoom {*/
+            /*cursor: move;*/
+            /*fill: none;*/
+            /*pointer-events: all;*/
+        /*}*/
 
     </style>
 
@@ -107,9 +119,8 @@
         </div>
         <div id="chart" class="col-6">
             <div class="chart"></div>
-            <!--<div class="line"></div>-->
             <div class="info">
-                <h1></h1>
+                <h5>Натисніть на точку, щоб побачити деталі.</h5>
                 <p class="repairment_company"></p>
                 <p class="year"></p>
                 <p class="work_type"></p>
