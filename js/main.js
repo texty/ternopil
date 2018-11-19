@@ -223,11 +223,11 @@ function onMapClick(e) {
 
     d3.select('div.info h5').text('Деталі робіт')
     d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
-    + e.sourceTarget.feature.properties.repairment_company.toString());
-    d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
+    + e.sourceTarget.feature.properties.repairment_company.toString() + ' у ' + e.sourceTarget.feature.properties.year.toString() + ' році');
+    // d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
     d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
     d3.select('div.info p.cost').text(
         e.sourceTarget.feature.properties.cost.toString() == '' ?
-            'Немає даних про вартість.' : 'Вартість: ' + 
+            'Немає даних про вартість.' : 'Вартість: ' +
         d3.format(',.2r')(e.sourceTarget.feature.properties.cost) + ' грн.')
 }
