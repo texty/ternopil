@@ -40,7 +40,7 @@ d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX0
             {'key':'Заміна мереж', 'value':0}, {'key':'Утеплення покрівлі', 'value':0},
             {'key':'Ремонт тепл. мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
             {'key':'Утеплення блоку', 'value':0}, {'key':'Ремонт тротуарів', 'value':0},
-            {'key':'Ремонт дороги', 'value':0}
+            {'key':'Ремонт дороги', 'value':0}, {'key': 'Ремонт прибуд. території'}
         ];
 
         // defined local option for time and currency ticks
