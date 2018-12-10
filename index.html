@@ -25,13 +25,27 @@
 
     <style>
 
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100vw;
+        }
+
+        div.container-fluid {
+            height:100%;
+        }
+
         line, path.domain {
             opacity: 0;
         }
 
         div#main {
             padding-top: 2rem;
-            height: 80vh;
+            height: 100%;
         }
 
         div#header {
@@ -147,21 +161,21 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container-fluid">
     <div class="row" id="header">
         <div class="col-12" id="headerCol">
             <h5>Карта комунальних ремонтів м. Тернопіль (Назва попередня!!)</h5>
-            <p>Дивіться, що ремонтували у Тернополі за бюджетні кошти. Графік показує загальну суму ремонтів які зараз на
+            <p class="subHeader">Дивіться, що ремонтували у Тернополі за бюджетні кошти. Графік показує загальну суму ремонтів які зараз на
             екрані. Натискайте на точки, щоб побачити детальний опис кожного ремонту.</p>
         </div>
     </div>
     <div class="row" id="main">
-        <div class="col-6 col-lg-6">
+        <div class="col-sm-12 col-md-6 col-lg-6">
             <div id="map"></div>
         </div>
-        <div id="chart" class="col-6 col-lg-6">
+        <div id="chart" class="col-sm-12 col-md-6">
             <div class="chart">
-                <h5>Вартість робіт (що зараз на екрані) грн.</h5>
+                <h5>Вартість робіт (що зараз на екрані), грн.</h5>
             </div>
             <div class="info">
                 <h5></h5>

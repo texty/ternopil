@@ -11,12 +11,6 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 }).addTo(map);
 
 
-// time scale for line chart not currently used
-// var timeScale = d3.scaleLinear()
-//     .domain([2012, 2018])
-//     .range([0.1, 1]);
-
-
 //defined style for layer, may use it if I'll need several layers
 function style(feature) {
     return {
@@ -35,7 +29,8 @@ function scaleColor(x) {
     return d3.interpolateReds(scale(x));
 }
 
-d3.csv('data/dataset.csv')
+//d3.csv('data/dataset.csv')
+d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX05JeBWOnu_DQ6eOpSOdBc41oYwAbDSLW8dRk1vuvEtNstlNgG-J9CECL/pub?gid=2068533860&single=true&output=csv')
     .then(function(data) {
 
         const innitialData = [
@@ -107,34 +102,19 @@ d3.csv('data/dataset.csv')
         var x = d3.scalePow().exponent(0.2)
             .range([0, width]);
         
-        var ticks = svg.append("g").attr('class', 'ticks')
+        var ticks = svg.append("g").attr('class', 'ticks');
 
         var xMax = d3.max(innitialData, function(d){ return d.value; });
         var xMedian = d3.median(innitialData, function(d){ return d.value; });
-        var percentile = d3.quantile(innitialData.map(d => d.value), 0.95);
 
-        // add the x Axis
-        // svg.append("g")
-        //     .attr("transform", "translate(0," + height + ")")
-        //     .attr('class', 'xAxis')
-        //     .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
 
         // add the y Axis
         svg.append("g")
             .attr('class', 'yAxis')
             .call(d3.axisLeft(y));
-            // .selectAll(".tick text")
-            // .style("text-anchor", "start")
-            // .attr("transform", "translate(" + -155 + ",0)");
-            // .call(wrap, margin.left);
 
 
         updateBarChart(height, local, x, y, svg, innitialData, xMax, xMedian);
-        
-
-
-        // Хотів додати лінійний графік для часу, але він погано виглядає і безтолковий
-        // createBrush(dataForChart)
 
 
         //EVENTS

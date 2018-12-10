@@ -9,13 +9,6 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
     x.domain([0, xMax]);
     y.domain(data.map(function(d) { return d.key; }));
 
-    function scaleColor(x) {
-        var scale = d3.scaleLog()
-            .domain([1, 500000000])
-            .range([0, 1]);
-        return d3.interpolateReds(scale(x));
-    }
-
 // append the rectangles for the bar chart
 
 
@@ -67,15 +60,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .text(d => formatSIPrefixed(local.format(".2s")(d.value)));
 
     textUpd.exit().remove();
-
-
-// add the x Axis
-//     svg.select('.xAxis')
-//         .attr("transform", "translate(0," + height + ")")
-//         .attr('class', 'xAxis')
-//         .transition()
-//         .duration(500)
-//         .call(d3.axisBottom(x).tickFormat(local.format("$,.2r")).tickValues([xMedian, xMax]));
+    
 
 // add the y Axis
     svg.select('.yAxis')
