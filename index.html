@@ -2,10 +2,50 @@
 <html>
 <head>
 
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Тернопіль</title>
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- OpenGraph Meta Tags -->
+    <meta property="og:site_name"
+          content="Чорна пʼятниця"/>
+    <meta property="og:type" content="http://texty.org.ua/d/2018/blackfriday/"/>
+    <meta property="og:title"
+          content="Чорна пʼятниця"/>
+    <meta property="og:image" content="http://texty.org.ua/d/2018/blackfriday/img/main.jpg"/>
+    <meta property="og:description"
+          content='Не така вже і чорна. Протягом півроку ми моніторили ціни на десятки тисяч товарів. А потім порівняли ціни головного розпродажу року із середніми цінами на ці товари.'/>
+    <meta property="og:url" content="http://texty.org.ua/d/2018/blackfriday/"/>
+
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:site" content="@textyorgua"/>
+    <meta property="twitter:account_id" content="49572937"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:url" content="http://texty.org.ua/d/2018/blackfriday/"/>
+    <meta name="twitter:title"
+          content="Чорна пʼятниця"/>
+    <meta name="twitter:description"
+          content='Не така вже і чорна. Протягом півроку ми моніторили ціни на десятки тисяч товарів. А потім порівняли ціни головного розпродажу року із середніми цінами на ці товари.'/>
+    <meta name="twitter:image:src" content="http://texty.org.ua/d/2018/blackfriday/img/main.jpg"/>
+    <meta name="twitter:image:width" content="1200"/>
+    <meta name="twitter:image:height" content="630"/>
+
+
+    <!-- Other Meta Tags -->
+    <meta name="title"
+          content="Чорна пʼятниця">
+    <meta name="description"
+          content='Не така вже і чорна. Протягом півроку ми моніторили ціни на десятки тисяч товарів. А потім порівняли ціни головного розпродажу року із середніми цінами на ці товари.'>
+
+
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans:400,500,500i,700,700i|Fira+Sans:200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800|Forum|Open+Sans:400,400i,600,600i,700|PT+Sans:400,400i,700|Roboto:400,500,500i,700|Source+Sans+Pro:400,400i,600,600i,700,700i,900&amp;subset=cyrillic-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Alegreya|Alice|Cormorant|Jura|Montserrat+Alternates|Philosopher" rel="stylesheet">
+
 
     <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
@@ -26,33 +66,104 @@
 
     <style>
 
-        body {
-            padding: 0;
-            margin: 0;
+        html,body
+        {
+            width: 100%;
+            height: 100%;
+            margin: 0px; ;
+            padding: 0px;
         }
 
-        html, body {
-            height: 100%;
-            width: 100vw;
+        /** {*/
+            /*background: #000 !important;*/
+            /*color: #0f0 !important;*/
+            /*outline: solid #f00 1px !important;*/
+        /*}*/
+
+
+
+
+        div.top {
+            background-color: #e1e1e1;
+        }
+
+        div.header {
+            height: 100vh;
+            background-image: url(img/cover.svg);
+            background-size: cover;
+            margin: 0 !important;
+        }
+
+        div.logo {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 120px;
+            height: 30px;
+            background-color: #c81b1d;
+        }
+
+        .gif {
+            border-radius: 5px; }
+
+        .social-icons {
+            height: 30px; }
+
+        #facebook, #twitter {
+            width: 30px;
+            height: 30px; }
+
+        #facebook {
+            position: absolute;
+            top: 5px;
+            right: 50px; }
+
+        #twitter {
+            position: absolute;
+            top: 5px;
+            right: 10px; }
+
+        div.text {
+            background-color: #e1e1e1;
+            padding: 0 25% 0 25%;
+        }
+
+        div.instruction {
+            padding: 0 25% 0 25%;
+            margin-top: 2em;
+            margin-bottom: 2em;
+        }
+
+        div.social-icons {
+            width: 30px;
         }
 
         div.container-fluid {
             height:100%;
+            /*margin: 2em;*/
         }
+
+
 
         line, path.domain {
             opacity: 0;
         }
 
         div#main {
-            padding-top: 2rem;
-            height: 100%;
+            padding: 2rem;
+            /*margin-left: 2vh;*/
+            height: 90%;
+        }
+
+        div.col-sm-12:nth-child(1) {
+            padding: 0;
         }
 
         div#header {
-            height: 10vh;
-            padding-left: 5vh;
-            padding-top: 2vh;
+            height: 10%;
+            padding-top: 1rem;
+            padding-left: 2rem;
+
         }
 
         div#headerCol {
@@ -88,6 +199,7 @@
             height: 100%;
             /*margin-top: 5vh;*/
         }
+
 
         div.col-6:nth-child(1) {
             padding-left: 5vh;
@@ -128,9 +240,7 @@
             height: 50vh;
         }
 
-        div.container {
-            margin: 0;
-        }
+
 
         div.info {
             margin-top: 3rem;
@@ -161,6 +271,63 @@
 
 </head>
 <body>
+
+
+    <div class="header">
+        <div class="logo">
+            <a href="http://texty.org.ua/" target="_blank">
+                <img class='gif' style="width:100%" src="img/logo.png"/>
+            </a>
+        </div>
+
+
+        <div class="social-icons">
+            <div class="facebook">
+                <a class='share-btn'
+                   href="https://www.facebook.com/sharer/sharer.php?u=http://texty.org.ua/d/2018/trees/">
+                    <svg class="cover" fill='#c81b1d' id="facebook" viewBox="0 0 448 512">
+                        <path d="M448 80v352c0 26.5-21.5 48-48 48h-85.3V302.8h60.6l8.7-67.6h-69.3V192c0-19.6 5.4-32.9 33.5-32.9H384V98.7c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9H184v67.6h60.9V480H48c-26.5 0-48-21.5-48-48V80c0-26.5 21.5-48 48-48h352c26.5 0 48 21.5 48 48z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="twitter">
+                <a class='share-btn' href="https://twitter.com/intent/tweet?text=http://texty.org.ua/d/2018/trees/">
+                    <svg id="twitter" fill='#c81b1d' viewBox="0 0 448 512">
+                        <path d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="text">
+        <h4><b>Щороку місто ремонтує дороги, тротуари, прибудинкові території
+            та іншу інфраструктуру на десятки мільйонів гривень. Вивчайте карту,
+            на якій показані всі ці роботи починаючи з 2015 року.</b></h4>
+
+        <p>Місто функціонує за гроші платників податків: чим більше грошей воно отримує, тим більше надає послуг. Значна частина видатків припадає на щоденні потреби: треба виплачувати зарплати, платити за комунальні послуги, закуповувати ліки. Але частина грошей призначена для розвитку та підтримки інфраструктури.</p>
+
+        <p>Зараз у Тернополі триває проект модернізації шкіл, фінансований кредитом Європейського Інвестиційного Банку. Впродовж наступних кількох років міські комунальні служби модернізуватимуть школи міста, щоб зробити їх енергоощадними. Крім цього, міська влада покриває частину витрат жителям багатоквартирних будинків, які утеплюють свої будинки.</p>
+
+        <p>Міська влада не завжди знає, якими наразі є актуальні потреби мешканців міста. Саме вони повинні стежити за тим, як здійснюються ремонти, й наскільки ефективно використовують їхні податки.</p>
+
+        <p>Окрім цього, містянам варто мислити стратегічно і дбати про те, щоб за допомогою ремонтів пристосовувати місто до своїх потреб. Наприклад, планувати безпечні переходи, про які ми писали на прикладі Києва (http://texty.org.ua/d/kyiv_crossings/#11/50.4669/30.5983), розвивати велоінфраструктуру, робити місто зручним для пішоходів та людей, що пересуваються на візках.</p>
+
+        <p>Якщо міська влада й містяни співпрацюватимуть, вони зможуть разом зробити своє місто безпечним та комфортним для життя. Часто для цього достатньо вже тих ресурсів, які у них є зараз. Для того, щоб містяни знали, що відбувається в Тернополі, ми створили карту, на якій позначені усі роботи, здійснені бюджетним коштом починаючи з 2015 року: від ремонту доріг ‒ до заміни лампочок.</p>
+
+    </div>
+
+
+<div class="instruction">
+    <h3><b>Як користуватися картою?</b></h3>
+
+    <p>Кожна точка ‒ це один ремонт. Натисніть на неї, щоб побачити деталі: рік, компанію-виконавця та опис робіт.</p>
+
+    <p>Усі роботи поділені на тринадцять категорій, які ви бачите праворуч біля графіків. Чим довший стовпчик ‒ тим більше грошей витратили на той чи інший вид робіт. Графік оновлюється щоразу, коли ви пересуваєте карту, і рахує статистику для тих точок, які показані на екрані. Тобто, ви можете подивитися, скільки грошей витрачено на весь Тернопіль, або спуститися до свого району: вибрати його на карті й подивитися, скільки грошей витратило на нього місто, і які ремонти там провели.</p>
+
+    <p>Або введіть свою адресу у полі для пошуку. Хочете побачити статистику по цілому Тернополю? Збільшіть масштаб карти так, щоб усе місто помістилося на екрані.</p>
+
+</div>
 
 <div class="container-fluid">
     <div class="row" id="header">
