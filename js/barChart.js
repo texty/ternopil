@@ -11,6 +11,8 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
 
 // append the rectangles for the bar chart
 
+    console.log(data);
+
 
     var barsUpd = svg.selectAll("rect")
         .data(data, function (d) {
@@ -21,7 +23,8 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .enter()
         .append("rect")
         .attr('class', 'bars')
-        .attr("height", y.bandwidth() * 0.7);
+        .attr('height', 7);
+        // .attr("height", y.bandwidth() * 0.7 );
 
     barsUpd.merge(barsEnter)
         .attr("x", function(d) { return 0; })
@@ -49,27 +52,27 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
     var textEnter = textUpd
         .enter()
         .append("text")
-        .attr('class', 'textTick')
-        .style("font", "10px sans-serif");
+        .attr('class', 'textTick');
+        // .style("font", "10px sans-serif");
 
     textUpd.merge(textEnter)
         .attr("fill", "grey")
-        .attr("x", d => x(d.value) + 25)
-        .attr("y", d => y(d.key) + y.bandwidth() / 2)
+        .attr("x", d =>  0)
+        .attr("y", d => y(d.key) - y.bandwidth() * 0.7)
         .attr("dy", "0.35em")
-        .text(d => formatSIPrefixed(local.format(".2s")(d.value)));
+        .text(d => d.key + ', ' + formatSIPrefixed(local.format(".2s")(d.value)));
 
     textUpd.exit().remove();
-    
+
 
 // add the y Axis
-    svg.select('.yAxis')
-        .transition() // Wait one second. Then brown, and remove.
-        .duration(500)
-        .call(d3.axisLeft(y))
-        .selectAll(".tick text")
-        .style("text-anchor", "start")
-        .attr("transform", "translate(" + -210 + ",0)");
+//     svg.select('.yAxis')
+//         .transition() // Wait one second. Then brown, and remove.
+//         .duration(500)
+//         .call(d3.axisLeft(y))
+//         .selectAll(".tick text")
+//         .style("text-anchor", "start")
+//         .attr("transform", "translate(" + -207 + ",0)");
 
 
 }

@@ -10,6 +10,22 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
     id: 'mapbox.light'
 }).addTo(map);
 
+var geocoder = L.Control.geocoder({
+    defaultMarkGeocode: false
+})
+    .on('markgeocode', function(e) {
+        var bbox = e.geocode.bbox;
+        var poly = L.polygon([
+            bbox.getSouthEast(),
+            bbox.getNorthEast(),
+            bbox.getNorthWest(),
+            bbox.getSouthWest()
+        ]);
+        map.fitBounds(poly.getBounds());
+    })
+    .addTo(map);
+
+
 
 //defined style for layer, may use it if I'll need several layers
 function style(feature) {
@@ -27,6 +43,17 @@ function scaleColor(x) {
         .domain([0, 5000000])
         .range([0, 1]);
     return d3.interpolateReds(scale(x));
+}
+
+
+// змінює залежно від розміру екрану те чи видно елемент .info
+if (document.body.clientWidth < 576) {
+    d3.select('div.info').node().style.display = 'visible';
+}
+else {
+    d3.select('div.info').node().style.display = 'none';
+
+
 }
 
 // d3.csv('data/dataset.csv')
@@ -90,10 +117,24 @@ d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX0
         //nested data to build bars
         prepareData(markers, innitialData);
 
-        var margin = {top: 0, right: 80, bottom: 5, left: 220},
-            width = document.getElementsByClassName('chart')[0].offsetWidth * 0.9 - margin.left - margin.right,
-            height = d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom;
 
+        // if (document.getElementsByClassName('chart')[0].offsetWidth < 350) {
+        //     var margin = {top: 10, right: 0, bottom: 5, left: 5}
+        // }
+        // else {
+        //     var margin = {top: 10, right: 0, bottom: 5, left: 5}
+        // }
+
+        var margin = {top: 5, right: 2, bottom: 5, left: 2};
+
+        // var width = (document.body.clientWidth * 0.5) - margin.left - margin.right,
+        //     height = (document.body.clientWidth * 0.9) - margin.left - margin.right
+
+
+        var width = document.getElementsByClassName('chart')[0].offsetWidth * 0.9 - margin.left - margin.right,
+            height = (document.getElementsByClassName('chart')[0].offsetHeight * 1 - margin.top - margin.bottom);
+            // d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom);
+        console.log(height)
 
         var svg = d3.select('div.chart').append('svg')
             .attr("width", width + margin.left + margin.right)
@@ -105,7 +146,11 @@ d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX0
             .range([height, 0])
             .padding(.5);
 
-        var x = d3.scalePow().exponent(0.2)
+        ////// exponential scale
+        // var x = d3.scalePow().exponent(0.2)
+        //     .range([0, width]);
+
+        var x = d3.scaleLinear()
             .range([0, width]);
         
         var ticks = svg.append("g").attr('class', 'ticks');
@@ -115,9 +160,10 @@ d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX0
 
 
         // add the y Axis
-        svg.append("g")
-            .attr('class', 'yAxis')
-            .call(d3.axisLeft(y));
+        // svg.append("g")
+        //     .attr('class', 'yAxis')
+        //     .attr("transform", "translate(" + width/1.9 + ",-15)")
+        //     .call(d3.axisLeft(y))
 
 
         updateBarChart(height, local, x, y, svg, innitialData, xMax, xMedian);
@@ -125,7 +171,6 @@ d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX0
 
         //EVENTS
         //////////////
-
         markers.on('click', onMapClick);
 
         // here I defined bar chart update after zoom or mouse move;
@@ -208,16 +253,41 @@ function prepareData(markers, innitialData) {
 // function to add detailed info about each work on click;
 function onMapClick(e) {
 
+    var popup = L.popup();
 
-    d3.select('div.info h5').text('Деталі робіт')
-    d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
-    + e.sourceTarget.feature.properties.repairment_company.toString() + ' у ' + e.sourceTarget.feature.properties.year.toString() + ' році');
-    // d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
-    d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
-    d3.select('div.info p.cost').text(
-        e.sourceTarget.feature.properties.cost.toString() == '' ?
-            'Немає даних про вартість.' : 'Вартість: ' +
-        formatSIPrefixed(d3.format('.2s')(e.sourceTarget.feature.properties.cost)))
+
+    var company = e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
+    + e.sourceTarget.feature.properties.repairment_company.toString() + ' у ' + e.sourceTarget.feature.properties.year.toString() + ' році'
+
+    var work_type = e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString()
+
+    var cost = e.sourceTarget.feature.properties.cost.toString() == '' ?
+        'Немає даних про вартість.' : 'Вартість: ' +
+    formatSIPrefixed(d3.format('.2s')(e.sourceTarget.feature.properties.cost));
+
+
+    if (document.body.clientWidth < 576) {
+
+        d3.select('div.info h5').text('Опис ремонту')
+        d3.select('div.info p.repairment_company').text(e.sourceTarget.feature.properties.repairment_company.toString() == '' ? 'Немає даних' : 'Роботу виконали: '
+        + e.sourceTarget.feature.properties.repairment_company.toString() + ' у ' + e.sourceTarget.feature.properties.year.toString() + ' році');
+        // d3.select('div.info p.year').text(' У ' + e.sourceTarget.feature.properties.year.toString() + ' році');
+        d3.select('div.info p.work_type').text(e.sourceTarget.feature.properties.description.toString() == '' ? 'Немає даних' : e.sourceTarget.feature.properties.description.toString());
+        d3.select('div.info p.cost').text(
+            e.sourceTarget.feature.properties.cost.toString() == '' ?
+                'Немає даних про вартість.' : 'Вартість: ' +
+            formatSIPrefixed(d3.format('.2s')(e.sourceTarget.feature.properties.cost)))
+    }
+    else {
+        popup
+            .setLatLng(e.latlng)
+            .setContent(
+                "<b>" + "Опис ремонту " + "</b>" + "<br>" + company + "<br>" + work_type + "<br>" + cost + "<br>"
+            )
+            .openOn(map);
+    }
+
+
 }
 
 function formatSIPrefixed(string) {

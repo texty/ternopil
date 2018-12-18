@@ -51,11 +51,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
     <link rel="stylesheet" href="lib/leaflet-control-window/src/L.Control.Window.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
 
     <!--<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>-->
     <script src="lib/leaflet.js"></script>
     <script src="lib/d3.jetpack.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="lib/Control.Geocoder.js"></script>
 
     <!--Bootstrap-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -66,12 +69,192 @@
 
     <style>
 
+        @media  (max-width:576px){
+            div#chart {
+                /*height: 100%;*/
+                padding-left: 0 !important;
+                font-size: 0.8rem !important;
+            }
+
+            text {
+                font-size: 0.8rem !important;
+            }
+
+            div.text {
+                padding: 0 10% 0 10%
+            }
+
+
+            div.chart {
+                padding-left: 0;
+                font-size: 0.8rem !important;
+            }
+            div.chart h5 {
+                height: 10% !important;
+            }
+
+            div#headerCol h3 {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media screen and (min-width: 577px) {
+            #credits {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-gap: 2em;
+            }
+        }
+
+        @media screen and (max-width: 577px) {
+            #read_more {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media screen and (max-width: 577px) {
+            #read_more {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        section#credits {
+            margin: 5em 0 2em 0;
+            padding: 1em 15% 1em 15%;
+            background-color: white;
+            /*color: #efefef;*/
+            font-size: 0.85em;
+            line-height: 1.5;
+            display: grid;
+            color: black;
+        }
+
+
+
+        #credits div {
+            padding: 1em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #credits img {
+            max-width: 15rem;
+            height: auto;
+        }
+
+        #read_more {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            margin: 4em 3em 2em 3em;
+            grid-gap: 3em;
+        }
+
+        #read_more h3 {
+            grid-column: 1/-1;
+            text-align: center;
+            font-size: 1.25em;
+        }
+
+        #read_more img {
+            max-width: 100%;
+        }
+
+        #created_texty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            justify-items: center;
+            align-content: center;
+            margin: 4em 0 0 0;
+        }
+
+        #created_texty i {
+            margin: 0.5em;
+            cursor: pointer;
+            width: 1em;
+            height: 1em;
+            border: 1px solid #9a9cb6;
+            color: #9a9cb6;
+            border-radius: 50%;
+            text-align: center;
+            vertical-align: bottom;
+            padding: 0.5em;
+            font-size: 2.5em;
+            line-height: 1;
+            transition: all 0.5s;
+        }
+
+        #footer {
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            height: 170px;
+            background: #1c2124 none repeat scroll 0 0;
+            text-align: left;
+            font-size: 14px;
+            padding: 0;
+            display: block;
+            margin-top: 50px;
+        }
+
+        #footer-wraper {
+            padding-top: 20px;
+            margin-left: 5%;
+            margin-left: 5%;
+        }
+
+        /*.footer ul li {*/
+            /*text-align: left;*/
+            /*font-size: 12px;*/
+        /*}*/
+
+        /*.footer .copying-info {*/
+            /*font-weight: 100;*/
+            /*font-family: 'Fira Sans', sans-serif;*/
+            /*font-size: 13px;*/
+            /*text-align: left;*/
+            /*grid-column: 2 / -2;*/
+            /*grid-row: 2 / 3;*/
+            /*max-width: 100vw;*/
+            /*min-height: 30px;*/
+        /*}*/
+
+        /*.footer ul li#big {*/
+            /*text-align: left;*/
+            /*font-size: 14px;*/
+        /*}*/
+
+        /*.footer .links1 {*/
+            /*grid-column: 3 / 4;*/
+            /*grid-row: 1 / 2;*/
+        /*}*/
+
+        /*.footer .links2 {*/
+            /*grid-column: 4 / 5;*/
+            /*grid-row: 1 / 2;*/
+        /*}*/
+
+        /*.footer .links3 {*/
+            /*grid-column: 5 / 6;*/
+            /*grid-row: 1 / 2;*/
+        /*}*/
+
+        /*.footer .links0 {*/
+            /*grid-column: 2 / 3;*/
+            /*grid-row: 1 / 2;*/
+        /*}*/
+
         html,body
         {
             width: 100%;
             height: 100%;
             margin: 0px; ;
             padding: 0px;
+        }
+
+        div.text a {
+            color: #c81b1d;
         }
 
         /** {*/
@@ -82,6 +265,9 @@
 
 
 
+        /*div.chartDiv {*/
+            /*height: 50vh;*/
+        /*}*/
 
         div.top {
             background-color: #e1e1e1;
@@ -90,8 +276,17 @@
         div.header {
             height: 100vh;
             background-image: url(img/cover.svg);
-            background-size: cover;
+            /*background-size: cover;*/
             margin: 0 !important;
+
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-color: #e1e1e1;
+        }
+
+        div#headerCol h3{
+            padding-top: 0.5em;
+            padding-bottom: 2em;
         }
 
         div.logo {
@@ -126,6 +321,11 @@
         div.text {
             background-color: #e1e1e1;
             padding: 0 25% 0 25%;
+            padding-bottom: 3em;
+        }
+
+        div.text h4{
+            padding-bottom: 1em;
         }
 
         div.instruction {
@@ -139,7 +339,7 @@
         }
 
         div.container-fluid {
-            height:100%;
+            /*height:100vh;*/
             /*margin: 2em;*/
         }
 
@@ -152,7 +352,7 @@
         div#main {
             padding: 2rem;
             /*margin-left: 2vh;*/
-            height: 90%;
+            height: auto;
         }
 
         div.col-sm-12:nth-child(1) {
@@ -160,7 +360,7 @@
         }
 
         div#header {
-            height: 10%;
+            height: 10vh;
             padding-top: 1rem;
             padding-left: 2rem;
 
@@ -168,6 +368,7 @@
 
         div#headerCol {
             padding: 0;
+            height: 20%;
         }
 
         div.col-12 > p {
@@ -177,7 +378,7 @@
         }
 
         div.info > p {
-            font-size: .8rem;
+            font-size: 1rem;
             color: grey;
         }
 
@@ -185,8 +386,13 @@
             font-size: 1rem;
         }
 
+        div.chart {
+            /*margin-bottom: 1rem;*/
+            height: 500px;
+        }
+
         div.chart h5 {
-            margin-bottom: 1rem;
+            height: 5%;
         }
 
 
@@ -196,7 +402,7 @@
 
         div#map {
             /*width: 600px;*/
-            height: 100%;
+            height: 80vh;
             /*margin-top: 5vh;*/
         }
 
@@ -207,7 +413,11 @@
         }
 
         div#chart {
+            /*padding-top: 5vh;*/
             padding-left: 5vh;
+            /*padding-right: 0;*/
+            height: 100%;
+            /*width: 100%;*/
         }
 
         div.col-7 {
@@ -215,7 +425,9 @@
         }
 
         div.info {
-            width: 80%;
+            margin-bottom: 2.5em;
+            margin-top: 2.5em;
+            font-size: 1rem;
         }
 
         div#infoHidden {
@@ -230,21 +442,11 @@
             background-color: white;
         }
 
-        div.chart {
-            height: 50vh;
-            /*margin-top: 5vh;*/
-            /*margin-left: 5vh;*/
-        }
 
         div.line {
             height: 50vh;
         }
 
-
-
-        div.info {
-            margin-top: 3rem;
-        }
 
         div.info h5 {
             margin-bottom: 1rem;
@@ -265,6 +467,13 @@
             /*fill: none;*/
             /*pointer-events: all;*/
         /*}*/
+
+
+        div#sweden img {
+            max-width: 12rem;
+        }
+
+
 
     </style>
 
@@ -303,7 +512,7 @@
     <div class="text">
         <h4><b>Щороку місто ремонтує дороги, тротуари, прибудинкові території
             та іншу інфраструктуру на десятки мільйонів гривень. Вивчайте карту,
-            на якій показані всі ці роботи починаючи з 2015 року.</b></h4>
+            на якій показані всі ці роботи починаючи з 2013 року.</b></h4>
 
         <p>Місто функціонує за гроші платників податків: чим більше грошей воно отримує, тим більше надає послуг. Значна частина видатків припадає на щоденні потреби: треба виплачувати зарплати, платити за комунальні послуги, закуповувати ліки. Але частина грошей призначена для розвитку та підтримки інфраструктури.</p>
 
@@ -311,7 +520,7 @@
 
         <p>Міська влада не завжди знає, якими наразі є актуальні потреби мешканців міста. Саме вони повинні стежити за тим, як здійснюються ремонти, й наскільки ефективно використовують їхні податки.</p>
 
-        <p>Окрім цього, містянам варто мислити стратегічно і дбати про те, щоб за допомогою ремонтів пристосовувати місто до своїх потреб. Наприклад, планувати безпечні переходи, про які ми писали на прикладі Києва (http://texty.org.ua/d/kyiv_crossings/#11/50.4669/30.5983), розвивати велоінфраструктуру, робити місто зручним для пішоходів та людей, що пересуваються на візках.</p>
+        <p>Окрім цього, містянам варто мислити стратегічно і дбати про те, щоб за допомогою ремонтів пристосовувати місто до своїх потреб. Наприклад, планувати безпечні переходи, про які ми писали на прикладі <a href="http://texty.org.ua/d/kyiv_crossings/#11/50.4669/30.5983">Києва</a>, розвивати велоінфраструктуру, робити місто зручним для пішоходів та людей, що пересуваються на візках.</p>
 
         <p>Якщо міська влада й містяни співпрацюватимуть, вони зможуть разом зробити своє місто безпечним та комфортним для життя. Часто для цього достатньо вже тих ресурсів, які у них є зараз. Для того, щоб містяни знали, що відбувається в Тернополі, ми створили карту, на якій позначені усі роботи, здійснені бюджетним коштом починаючи з 2015 року: від ремонту доріг ‒ до заміни лампочок.</p>
 
@@ -329,37 +538,73 @@
 
 </div>
 
-<div class="container-fluid">
-    <div class="row" id="header">
-        <div class="col-12" id="headerCol">
-            <h5>Карта комунальних ремонтів м. Тернопіль (Назва попередня!!)</h5>
-            <p class="subHeader">Дивіться, що ремонтували у Тернополі за бюджетні кошти. Графік показує загальну суму ремонтів які зараз на
-            екрані. Натискайте на точки, щоб побачити детальний опис кожного ремонту.</p>
-        </div>
-    </div>
-    <div class="row" id="main">
-        <div class="col-sm-12 col-md-6 col-lg-6">
-            <div id="map"></div>
-        </div>
-        <div id="chart" class="col-sm-12 col-md-6">
-            <div class="chart">
-                <h5>Вартість робіт (що зараз на екрані), грн.</h5>
-            </div>
-            <div class="info">
-                <h5></h5>
-                <p class="repairment_company"></p>
-                <p class="year"></p>
-                <p class="work_type"></p>
-                <p class="cost"></p>
-            </div>
-        </div>
 
-    </div>
+<div class="container-fluid">
+        <div class="row" id="header">
+            <div class="col-12" id="headerCol">
+                <h3>Карта комунальних ремонтів Тернополя</h3>
+                <!--<p class="subHeader">Дивіться, що ремонтували у Тернополі за бюджетні кошти. Графік показує загальну суму ремонтів які зараз на-->
+                    <!--екрані. Натискайте на точки, щоб побачити детальний опис кожного ремонту.</p>-->
+            </div>
+        </div>
+        <div class="row" id="main">
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mapDiv" >
+                <div id="map"></div>
+            </div>
+            <div id="chart" class="col-xs-12 col-sm-12 col-md-6 col-lg-6 chartDiv">
+                <div class="info">
+                    <h5></h5>
+                    <p class="repairment_company"></p>
+                    <p class="year"></p>
+                    <p class="work_type"></p>
+                    <p class="cost"></p>
+                </div>
+                <div class="chart">
+                    <h5>Вартість робіт (що зараз на екрані), грн.</h5>
+                </div>
+            </div>
+        </div>
 
 </div>
 
 
-<!--js files-->
+
+    <section id="credits" class="reading">
+        <div id="sweden">
+            <a href="http://www.irf.ua/" target="_blank"><img src="img/sweden.jpg"></a>
+        </div>
+        <div>
+            <a href="http://www.irf.ua/" target="_blank"><img src="img/Vidrodžennia-Logos-Horizontal-16-01.png"></a>
+        </div>
+        <p>Матеріал підготовлено у межах проекту "Ініціатива з розвитку аналітичних центрів"
+            який виконує міжнародний фонд "Відродження
+             за фінансової підтримки Посольства Швеції в Україні.
+
+
+            ”Текстовий аналіз фейкових новин в українських інтернет-медіа”.</p>
+        <!--<p>Матеріал відображає позицію авторів і не обов’язково збігається з позицією Міжнародного фонду «Відродження»</p>-->
+    </section>
+
+    <section id="read_more">
+        <h3>Читайте також:</h3>
+        <a target="_blank" href="http://texty.org.ua/d/2018/amber/">
+            <img src="img/amber.jpg" alt="Дірявий край. Видобуток бурштину перетворює поліські ліси на місячну поверхню">
+        </a>
+        <a target="_blank" href="http://texty.org.ua/d/2018/twitter/">
+            <img src="img/twitter_bots.png" alt="Твіттер-боти Медведчука та інших">
+        </a>
+        <a target="_blank" href="http://texty.org.ua/d/fb-trolls/">
+            <img src="img/trolls.png" alt="Тролесфера">
+        </a>
+    </section>
+
+
+
+
+
+
+
+    <!--js files-->
 <script src="js/barChart.js"></script>
 <script src="js/main.js"></script>
 <!--<script src="js/brush.js"></script>-->
