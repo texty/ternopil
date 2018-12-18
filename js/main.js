@@ -57,7 +57,7 @@ else {
 }
 
 // d3.csv('data/dataset.csv')
-d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQPsu0TBxNPtFHoXrTrPUBX05JeBWOnu_DQ6eOpSOdBc41oYwAbDSLW8dRk1vuvEtNstlNgG-J9CECL/pub?gid=2068533860&single=true&output=csv')
+d3.csv('data/ternopil_data.csv')
     .then(function(data) {
 
         const innitialData = [
