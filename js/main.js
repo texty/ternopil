@@ -57,18 +57,14 @@ else {
 }
 
 // d3.csv('data/dataset.csv')
-d3.csv('data/ternopil_data.csv')
+d3.csv('data/data_updated.csv')
     .then(function(data) {
 
         const innitialData = [
-            {'key':'Утеплення торців', 'value':0}, {'key':'Утеплення будинку', 'value':0},
-            {'key':'Встановлення ІТП', 'value':0}, {'key':'Заміна вікон', 'value':0},
-            {'key':'Заміна вікон та освітлення', 'value':0}, {'key':'Утеплення стін', 'value':0},
-            {'key':'Утеплення покрівлі', 'value':0}, {'key':'Ремонт покрівель', 'value':0},
-            {'key':'Ремонт теплових мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
-            {'key':'Утеплення блоку', 'value':0}, {'key':'Ремонт тротуарів', 'value':0},
+             {'key':'Ремонт покрівель', 'value':0},
+            {'key':'Ремонт тротуарів', 'value':0},
             {'key':'Ремонт дороги', 'value':0}, {'key': 'Ремонт прибуд. території', 'value':0},
-            {'key': 'Ремонт міжкв. проїздів', 'value':0}
+            {'key': 'Тепломодернізація', 'value':0}
 
 
         ];
@@ -138,9 +134,8 @@ d3.csv('data/ternopil_data.csv')
 
 
         var width = document.getElementsByClassName('chart')[0].offsetWidth * 0.9 - margin.left - margin.right,
-            height = (document.getElementsByClassName('chart')[0].offsetHeight * 1 - margin.top - margin.bottom);
+            height = (document.getElementsByClassName('chart')[0].offsetHeight * 0.5 - margin.top - margin.bottom);
             // d3.select('div.chart')._groups[0][0].clientHeight - margin.top - margin.bottom);
-        console.log(height)
 
         var svg = d3.select('div.chart').append('svg')
             .attr("width", width + margin.left + margin.right)
