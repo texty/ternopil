@@ -11,7 +11,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
 
 // append the rectangles for the bar chart
 
-    console.log(data);
+    console.log(data.map(d => d.key));
 
 
     var barsUpd = svg.selectAll("rect")

@@ -63,11 +63,14 @@ d3.csv('data/ternopil_data.csv')
         const innitialData = [
             {'key':'Утеплення торців', 'value':0}, {'key':'Утеплення будинку', 'value':0},
             {'key':'Встановлення ІТП', 'value':0}, {'key':'Заміна вікон', 'value':0},
-            {'key':'Заміна вікон та освітл.', 'value':0}, {'key':'Утеплення стін', 'value':0},
-            {'key':'Заміна мереж', 'value':0}, {'key':'Утеплення покрівлі', 'value':0},
-            {'key':'Ремонт тепл. мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
+            {'key':'Заміна вікон та освітлення', 'value':0}, {'key':'Утеплення стін', 'value':0},
+            {'key':'Утеплення покрівлі', 'value':0}, {'key':'Ремонт покрівель', 'value':0},
+            {'key':'Ремонт теплових мереж', 'value':0}, {'key':'Утеплення під’їздів', 'value':0},
             {'key':'Утеплення блоку', 'value':0}, {'key':'Ремонт тротуарів', 'value':0},
-            {'key':'Ремонт дороги', 'value':0}, {'key': 'Ремонт прибуд. території'}
+            {'key':'Ремонт дороги', 'value':0}, {'key': 'Ремонт прибуд. території', 'value':0},
+            {'key': 'Ремонт міжкв. проїздів', 'value':0}
+
+
         ];
 
         // defined local option for time and currency ticks
@@ -85,6 +88,9 @@ d3.csv('data/ternopil_data.csv')
             "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
             "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         });
+
+
+        window.data = data;
 
         // created geojson out of basic data
         var geojson = data.map(function (d) {
