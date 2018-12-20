@@ -63,6 +63,7 @@ function updateBarChart(height, local, x, y, svg, data, xMax, xMedian) {
         .text(d => d.key + ', ' + formatSIPrefixed(local.format(".2s")(d.value)));
 
     textUpd.exit().remove();
+    
 
 
 // add the y Axis

@@ -69,6 +69,25 @@ d3.csv('data/data_updated.csv')
 
         ];
 
+
+        function addList(){
+            var select = document.getElementById("year");
+            var years = [...new Set(data.map(d => d.year))].sort(function compare(a, b) {
+                var dateA = new Date(a);
+                var dateB = new Date(b);
+                return dateB - dateA;
+            });
+
+            years.forEach(function (d) {
+                var option = document.createElement('option');
+                option.text = option.value = d;
+                select.add(option, 0);
+            });
+        }
+
+        addList();
+
+
         // defined local option for time and currency ticks
         var local = d3.formatLocale ({
             "decimal": ".",
@@ -100,6 +119,9 @@ d3.csv('data/data_updated.csv')
             }
         });
 
+        function filt(feature, layer) {
+            if (feature.properties.year == d3.select("select#year").property("value")) return true;
+        }
 
         //created leaflet markers
         var markers = L.geoJSON(geojson,{
@@ -111,10 +133,35 @@ d3.csv('data/data_updated.csv')
                     catch(err) {
                         debugger;
                     }
-
-                }
+                },
+            filter: filt
             })
             .addTo(map);
+
+        var geojsonSubset;
+
+        d3.selectAll('#year option').on('click', function () {
+            let selected = d3.select("select#year").property("value");
+
+            geojsonSubset = geojson.filter(d => d.properties.year == selected);
+
+            markers.clearLayers();
+
+            markers.addData(geojsonSubset);
+
+            prepareData(markers, innitialData);
+
+            var xMax = d3.max(innitialData, function(d){ return d.value; });
+            var xMedian = d3.median(innitialData, function(d){ return d.value; });
+            //var percentile = d3.quantile(nested.map(d => d.value), 0.95);
+
+            // Scale the range of the data in the domains
+            x.domain([0, xMax]);
+            y.domain(innitialData.map(function(d) { return d.key; }));
+
+            updateBarChart(height,local, x, y, svg, innitialData, xMax, xMedian);
+
+        });
 
         //nested data to build bars
         prepareData(markers, innitialData);
@@ -174,6 +221,12 @@ d3.csv('data/data_updated.csv')
         //////////////
         markers.on('click', onMapClick);
 
+        svg.selectAll(".textTick").on('click', function (d) {
+            console.log(d.key);
+
+// WORKING HERE
+        });
+
         // here I defined bar chart update after zoom or mouse move;
         map.on('moveend', function() {
             prepareData(markers, innitialData);
@@ -189,6 +242,7 @@ d3.csv('data/data_updated.csv')
             updateBarChart(height,local, x, y, svg, innitialData, xMax, xMedian);
             
         });
+
         
         ///////////////
         
