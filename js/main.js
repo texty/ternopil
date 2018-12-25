@@ -27,25 +27,6 @@ var geocoder = L.Control.geocoder({
 
 
 
-//defined style for layer, may use it if I'll need several layers
-function style(feature) {
-    return {
-        color: 'white',
-        fill: scaleColor(+feature.properties.cost),
-        fillOpacity: 1,
-        fillColor: scaleColor(+feature.properties.cost)
-    };
-}
-
-// defined color scale
-function scaleColor(x) {
-    var scale = d3.scaleLinear()
-        .domain([0, 5000000])
-        .range([0, 1]);
-    return d3.interpolateReds(scale(x));
-}
-
-
 // змінює залежно від розміру екрану те чи видно елемент .info
 if (document.body.clientWidth < 576) {
     d3.select('div.info').node().style.display = 'visible';
@@ -60,6 +41,8 @@ else {
 d3.csv('data/data_updated.csv')
     .then(function(data) {
 
+        var selectedWorkType;
+
         const innitialData = [
              {'key':'Ремонт покрівель', 'value':0},
             {'key':'Ремонт тротуарів', 'value':0},
@@ -68,6 +51,30 @@ d3.csv('data/data_updated.csv')
 
 
         ];
+
+
+        let currentYear = d3.select("select#year").property("value");
+
+        let maxCost = d3.max(data.filter(d => d.year == ((new Date()).getFullYear()).toString()).map(d => +d.cost));
+
+// defined color scale
+        function scaleColor(x) {
+            var scale = d3.scaleLinear()
+                .domain([0, maxCost])
+                .range([0, 1]);
+            return d3.interpolateReds(scale(x));
+        }
+
+        //defined style for layer, may use it if I'll need several layers
+        function style(feature) {
+            return {
+                color: 'white',
+                fill: scaleColor(+feature.properties.cost),
+                fillOpacity: 1,
+                fillColor: scaleColor(+feature.properties.cost)
+            };
+        }
+
 
 
         function addList(){
@@ -222,9 +229,26 @@ d3.csv('data/data_updated.csv')
         markers.on('click', onMapClick);
 
         svg.selectAll(".textTick").on('click', function (d) {
-            console.log(d.key);
+            markers.eachLayer(function (layer) {
 
-// WORKING HERE
+// LATEST WORKING HERE
+                if (selectedWorkType == d.key) {
+                    layer.setStyle({fillOpacity: 1, opacity: 1, color: 'white'});
+                    selectedWorkType = d.key;
+                }
+                else {
+                    if(layer.feature.properties.work_type == d.key) {
+
+                        var col = scaleColor(+layer.feature.properties.cost);
+                        layer.setStyle({fillOpacity : 1, opacity: 1, color:'#e1e1e1', fill: col});
+                        selectedWorkType = d.key;
+                    }
+                    else {
+                        layer.setStyle({fillOpacity: .2, opacity: .2, color: 'white'});
+                        // selectedWorkType = d.key;
+                    }
+                }
+            });
         });
 
         // here I defined bar chart update after zoom or mouse move;
